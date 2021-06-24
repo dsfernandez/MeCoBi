@@ -8,10 +8,8 @@ navbar:
       href: home.html
     - text: "Modelos de Regresión"
       menu:
-      
     - text: "Series de Tiempo"
       menu:
-      
     - text: "Sistemodinámica"
       menu:
 
