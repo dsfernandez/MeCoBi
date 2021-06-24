@@ -1,0 +1,21 @@
+name: "MeCoBi"
+output_dir: "."
+navbar:
+  title: "MeCoBi"
+  left:
+    - text: "Hola"
+      icon: fa-home
+      href: home.html
+    - text: "Modelos de Regresión"
+      menu:
+      
+    - text: "Series de Tiempo"
+      menu:
+      
+    - text: "Sistemodinámica"
+      menu:
+
+output:
+  html_document:
+    highlight: textmate
+
