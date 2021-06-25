@@ -1,0 +1,7 @@
+---
+title: "Hola"
+output: html_document
+---
+
+## Curso INTD 4055
+# Métodos Computacionales Aplicados a Sistemas Biológicos
