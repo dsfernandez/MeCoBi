@@ -3,13 +3,9 @@ title: 'MeCoBi: Modelos de Regresión Logística'
 author: "D. S. Fernández del Viso"
 date: "Septiembre 2020"
 output:
-  slidy_presentation:
-    incremental: yes
   html_document:
     toc: yes
     toc_depth: 4
-  word_document:
-    toc: yes
 ---
 
 # Regresión Logística
@@ -63,7 +59,7 @@ Para este modelo utilizaremos la función __glm__ (general linear model):
 ```{r logistic, message=FALSE, warning=FALSE, include=FALSE}
 #leemos los datos:
 library(readxl)
-hbp <- read_excel("mod_empiricos.xlsx", 
+hbp <- read_excel("data/mod_empiricos.xlsx", 
                             sheet = "hbp")
 ```
 
@@ -151,7 +147,7 @@ ggplot(PimaIndiansDiabetes2, aes(x=glucose, y=diabetes01, na.rm = TRUE)) +
 ## Datos
 ```{r}
 library(readxl)
-titanic <- read_excel("Titanic.xlsx", na = "NA")
+titanic <- read_excel("data/Titanic.xlsx", na = "NA")
 head(titanic)
 ```
 

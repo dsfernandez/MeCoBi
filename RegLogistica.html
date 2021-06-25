@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+<meta name="author" content="D. S. Fernandez del Viso" />
+
+
+<title>MeCoBi: Modelos de Regresion Logística</title>
+
+<script src="site_libs/header-attrs-2.9/header-attrs.js"></script>
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/flatly.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<style>h1 {font-size: 34px;}
+       h1.title {font-size: 38px;}
+       h2 {font-size: 30px;}
+       h3 {font-size: 24px;}
+       h4 {font-size: 18px;}
+       h5 {font-size: 16px;}
+       h6 {font-size: 12px;}
+       code {color: inherit; background-color: rgba(0, 0, 0, 0.04);}
+       pre:not([class]) { background-color: white }</style>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<link href="site_libs/font-awesome-5.1.0/css/all.css" rel="stylesheet" />
+<link href="site_libs/font-awesome-5.1.0/css/v4-shims.css" rel="stylesheet" />
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+<style type="text/css">code{white-space: pre;}</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+pre code {
+  padding: 0;
+}
+</style>
+
+
+<style type="text/css">
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #adb5bd;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script type="text/javascript">
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.tab('show');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+
+  // Navbar adjustments
+  var navHeight = $(".navbar").first().height() + 15;
+  var style = document.createElement('style');
+  var pt = "padding-top: " + navHeight + "px; ";
+  var mt = "margin-top: -" + navHeight + "px; ";
+  var css = "";
+  // offset scroll position for anchor links (for fixed navbar)
+  for (var i = 1; i <= 6; i++) {
+    css += ".section h" + i + "{ " + pt + mt + "}\n";
+  }
+  style.innerHTML = "body {" + pt + "padding-bottom: 40px; }\n" + css;
+  document.head.appendChild(style);
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "&#xe258;";
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">MeCoBi</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="home.html">
+    <span class="fa fa-home"></span>
+     
+    Hola
+  </a>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    Modelos de Regresión
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="RegresionLinealSimplePoli.html">Regresión Lineal Simple</a>
+    </li>
+    <li>
+      <a href="RegLogistica.html">Regresión Logística</a>
+    </li>
+  </ul>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    Series de Tiempo
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="SeriesTiempo.html">Series de Tiempo</a>
+    </li>
+  </ul>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    Modelos Dinámicos
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="modelEpidem.html">Modelo Epidemiológico</a>
+    </li>
+    <li>
+      <a href="ModelMecODE-SIR-I.html">SIR-I</a>
+    </li>
+    <li>
+      <a href="ModelMecODE-SIR-II.html">SIR-II</a>
+    </li>
+  </ul>
+</li>
+<li class="dropdown-header">Modelos Espaciales</li>
+<li class="dropdown-header">Modelos Basados en Agentes</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div id="header">
+
+
+
+<h1 class="title toc-ignore">MeCoBi: Modelos de Regresion Logística</h1>
+<h4 class="author">D. S. Fernandez del Viso</h4>
+<h4 class="date">Septiembre 2019</h4>
+
+</div>
+
+<div id="TOC">
+<ul>
+<li><a href="#modelo-logístico-con-glm">Modelo logístico con glm</a></li>
+<li><a href="#ejemplo-2-variables-predictoras-de-diabetes-tipo-2-en-una-población-de-nativos-pima">EJEMPLO 2: Variables predictoras de diabetes tipo 2, en una población de nativos Pima</a>
+<ul>
+<li><a href="#datos">Datos</a></li>
+<li><a href="#dividiendo-los-datos-en-training-y-test">Dividiendo los datos en “training” y “test”</a></li>
+<li><a href="#modelo-usando-glm">Modelo usando glm</a>
+<ul>
+<li><a href="#gráfica-logística-diabetes-vs-glucosa">Gráfica logística diabetes vs glucosa</a></li>
+</ul></li>
+<li><a href="#predicciones-usando-el-20-de-los-datos">Predicciones usando el 20% de los datos</a></li>
+</ul></li>
+</ul>
+</div>
+
+<p>#Regresión Logística</p>
+<p>En una <strong>regresión logística</strong> la variable respuesta (dependiente) es una <em>variable binaria</em> (dicótoma en términos generales), y las variables predictoras (independientes) pueden ser binarias, categóricas o continuas.</p>
+<p><a href="https://www.machinelearningplus.com/machine-learning/logistic-regression-tutorial-examples-r/">Logistic Regression vs Linear Regression</a> <img src="media/linear_vs_logistic_regression.jpg" /></p>
+<p>Como la variable respuesta solo puede tener valores entre 0 o 1, y las variables independientes pueden ser continuas, con cualquier valor real, para formular un modelo de regresión logística se hace una transformación de probabilidades a ‘razones de probabilidades’ (en inglés <strong>odd ratios (ORs)</strong>), o proporción de casos favorables a desfavorables.</p>
+<p>La transformación tiene esta forma:</p>
+<p><span class="math display">\[OR_i = \frac{\pi}{1-\pi} \qquad (1)\]</span> donde <span class="math inline">\(\pi\)</span> es la probabilidad de que el evento dependiente (<span class="math inline">\(Y\)</span>) ocurra; luego se calcula el logaritmo del <span class="math inline">\(OR\)</span>, el cual se denomina <em>logit</em>:</p>
+<p><span class="math display">\[logit(\pi) = log\frac{\pi}{1-\pi} \qquad (2)\]</span></p>
+<p>El modelo para la regresión, con dos variables independientes (<span class="math inline">\(x_1\)</span>, <span class="math inline">\(x_2\)</span>), es:</p>
+<p><span class="math display">\[logit(\pi)=\beta_0 + x_1\beta_1 +x_2\beta_2\qquad (3)\]</span></p>
+<p>##EJEMPLO 1: Predicción de alta presión en mujeres Vamos a explorar un modelo de diagnóstico de alta presión, a partir de datos de mujeres (n = 189), en relación a su edad, estado de menopausia, y el índice de masa corporal. Los datos están codificados como variables binarias:</p>
+<table>
+<thead>
+<tr class="header">
+<th align="left">Variables</th>
+<th align="left">Nombre</th>
+<th align="center">Código</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">Edad (años)</td>
+<td align="left">age</td>
+<td align="center">0:≤50, 1&gt;50</td>
+</tr>
+<tr class="even">
+<td align="left">Alta presión</td>
+<td align="left">dxhigh</td>
+<td align="center">0:no, 1:sí</td>
+</tr>
+<tr class="odd">
+<td align="left">BMI (kg/m2)</td>
+<td align="left">bmi</td>
+<td align="center">0:≤25, 1:&gt;25</td>
+</tr>
+<tr class="even">
+<td align="left">Menopausia</td>
+<td align="left">menop</td>
+<td align="center">0:pre-, 1:menopausia</td>
+</tr>
+</tbody>
+</table>
+<p>Para este modelo utilizaremos la función <strong>glm</strong> (general linear model):</p>
+<pre class="r"><code>#leemos los datos:
+library(readxl)
+hbp &lt;- read_excel(&quot;data/mod_empiricos.xlsx&quot;, 
+                            sheet = &quot;hbp&quot;)</code></pre>
+<div id="modelo-logístico-con-glm" class="section level3">
+<h3>Modelo logístico con glm</h3>
+<pre class="r"><code>#modelo logístico:
+highbp &lt;- glm(dxhigh ~ age + bmi + menop, data = hbp,
+              family=binomial(logit))
+#resumen de los resultados:
+summary(highbp)</code></pre>
+<pre><code>## 
+## Call:
+## glm(formula = dxhigh ~ age + bmi + menop, family = binomial(logit), 
+##     data = hbp)
+## 
+## Deviance Residuals: 
+##     Min       1Q   Median       3Q      Max  
+## -1.0392  -0.8084  -0.6580   1.3222   2.0781  
+## 
+## Coefficients:
+##             Estimate Std. Error z value Pr(&gt;|z|)    
+## (Intercept)  -2.0367     0.4550  -4.476 7.61e-06 ***
+## age           0.6376     0.4920   1.296    0.195    
+## bmi           0.6165     0.4620   1.334    0.182    
+## menop         0.4484     0.4887   0.918    0.359    
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## (Dispersion parameter for binomial family taken to be 1)
+## 
+##     Null deviance: 218.39  on 188  degrees of freedom
+## Residual deviance: 206.60  on 185  degrees of freedom
+## AIC: 214.6
+## 
+## Number of Fisher Scoring iterations: 4</code></pre>
+<pre class="r"><code>#obtener los coeficientes como ORs:
+exp(cbind(OR = coef(highbp), confint(highbp)))</code></pre>
+<pre><code>##                    OR     2.5 %    97.5 %
+## (Intercept) 0.1304608 0.0491431 0.2984743
+## age         1.8919266 0.7125247 4.9772745
+## bmi         1.8523471 0.7836975 4.9120329
+## menop       1.5658815 0.6016810 4.1448987</code></pre>
+</div>
+<div id="ejemplo-2-variables-predictoras-de-diabetes-tipo-2-en-una-población-de-nativos-pima" class="section level2">
+<h2>EJEMPLO 2: Variables predictoras de diabetes tipo 2, en una población de nativos Pima</h2>
+<p>En este caso las variables independientes no son binarias (0,1) sino datos continuos. No se calculan los <span class="math inline">\(OR\)</span> (ni <em>logit</em>), y el resultado son sólo los coeficientes de la regresión.</p>
+<div id="datos" class="section level3">
+<h3>Datos</h3>
+<pre class="r"><code># paquetes
+library(tidyverse)
+library(caret)
+library(mlbench)
+# cargar datos (estos son directamente del paquete mlbench, en su caso debe usar readxl o similar)
+data(&quot;PimaIndiansDiabetes2&quot;, package = &quot;mlbench&quot;)
+# inspeccionar los datos
+sample_n(PimaIndiansDiabetes2, 6)</code></pre>
+<pre><code>##     pregnant glucose pressure triceps insulin mass pedigree age diabetes
+## 755        8     154       78      32      NA 32.4    0.443  45      pos
+## 169        4     110       66      NA      NA 31.9    0.471  29      neg
+## 281        0     146       70      NA      NA 37.9    0.334  28      pos
+## 667        4     145       82      18      NA 32.5    0.235  70      pos
+## 330        6     105       70      32      68 30.8    0.122  37      neg
+## 691        8     107       80      NA      NA 24.6    0.856  34      neg</code></pre>
+</div>
+<div id="dividiendo-los-datos-en-training-y-test" class="section level3">
+<h3>Dividiendo los datos en “training” y “test”</h3>
+<pre class="r"><code># Split the data into training and test set
+set.seed(123)
+training.samples &lt;- PimaIndiansDiabetes2$diabetes %&gt;% 
+  createDataPartition(p = 0.8, list = FALSE)
+train.data  &lt;- PimaIndiansDiabetes2[training.samples, ]
+test.data &lt;- PimaIndiansDiabetes2[-training.samples, ]</code></pre>
+</div>
+<div id="modelo-usando-glm" class="section level3">
+<h3>Modelo usando glm</h3>
+<pre class="r"><code>library(MASS)
+# Fit the model
+model &lt;- glm(diabetes ~., data = train.data, family = binomial)
+# Summarize the final selected model
+summary(model)</code></pre>
+<pre><code>## 
+## Call:
+## glm(formula = diabetes ~ ., family = binomial, data = train.data)
+## 
+## Deviance Residuals: 
+##     Min       1Q   Median       3Q      Max  
+## -2.8046  -0.6712  -0.3765   0.6316   2.6294  
+## 
+## Coefficients:
+##               Estimate Std. Error z value Pr(&gt;|z|)    
+## (Intercept) -1.026e+01  1.392e+00  -7.370 1.71e-13 ***
+## pregnant     3.562e-02  6.256e-02   0.569  0.56911    
+## glucose      3.969e-02  6.817e-03   5.822 5.80e-09 ***
+## pressure    -3.277e-03  1.306e-02  -0.251  0.80184    
+## triceps     -1.009e-03  1.971e-02  -0.051  0.95916    
+## insulin     -6.832e-04  1.445e-03  -0.473  0.63645    
+## mass         8.291e-02  3.171e-02   2.615  0.00893 ** 
+## pedigree     1.619e+00  5.010e-01   3.231  0.00123 ** 
+## age          3.520e-02  2.001e-02   1.759  0.07849 .  
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## (Dispersion parameter for binomial family taken to be 1)
+## 
+##     Null deviance: 399.60  on 314  degrees of freedom
+## Residual deviance: 278.74  on 306  degrees of freedom
+##   (300 observations deleted due to missingness)
+## AIC: 296.74
+## 
+## Number of Fisher Scoring iterations: 5</code></pre>
+<div id="gráfica-logística-diabetes-vs-glucosa" class="section level4">
+<h4>Gráfica logística diabetes vs glucosa</h4>
+<pre class="r"><code>library(ggplot2)
+#pasar datos de diabetes &quot;pos&quot; y &quot;neg&quot; a 1s y 0s
+diabetes01 &lt;- ifelse(PimaIndiansDiabetes2$diabetes == &quot;pos&quot;, 1, 0)
+#gráfica con curva logística
+ggplot(PimaIndiansDiabetes2, aes(x=glucose, y=diabetes01, na.rm = TRUE)) +
+  geom_point() +
+  geom_smooth(method = &quot;glm&quot;, 
+    method.args = list(family = &quot;binomial&quot;), 
+    se = FALSE)</code></pre>
+<p><img src="RegLogistica_files/figure-html/unnamed-chunk-5-1.png" width="672" /></p>
+</div>
+</div>
+<div id="predicciones-usando-el-20-de-los-datos" class="section level3">
+<h3>Predicciones usando el 20% de los datos</h3>
+<pre class="r"><code># Make predictions
+probabilities &lt;- model %&gt;% predict(test.data, type = &quot;response&quot;)
+predicted.classes &lt;- ifelse(probabilities &gt; 0.5, &quot;pos&quot;, &quot;neg&quot;)
+# Prediction accuracy
+observed.classes &lt;- test.data$diabetes
+mean(predicted.classes == observed.classes, na.rm = TRUE)</code></pre>
+<pre><code>## [1] 0.8051948</code></pre>
+</div>
+</div>
+
+
+
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.odd').parent('tbody').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open');
+  });
+});
+</script>
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

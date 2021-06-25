@@ -17,7 +17,7 @@ En esta parte del curso vamos a trabajar con modelos construidos a partir del co
 
 Kermack and McKendrick (1927) formularon una serie de ecuaciones para entender el funcionamiento de un sistema epidemiológico, para una infección que se extiende y luego disminuye.  En resumen, su planteamiento se puede expresar en un modelo básico a base de un sistema de ecuaciones diferenciales:
 
-![tomado de Bjørnstad (2018)](./images/SIR-epidemics.png)  
+![tomado de Bjørnstad (2018)](media/SIR-epidemics.png)  
 
 $$\frac{dS}{dt} = \mu(N - S) - \beta I\frac{S}{N}\qquad(1)$$  
 $$\frac{dI}{dt} = \beta I\frac{S}{N} - (\mu + \gamma)I\qquad(2)$$  

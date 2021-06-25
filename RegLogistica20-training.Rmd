@@ -111,7 +111,7 @@ mean(predicted.classes == observed.classes, na.rm = TRUE)
 ## Datos
 ```{r}
 library(readxl)
-titanic <- read_excel("Titanic.xlsx", na = "NA")
+titanic <- read_excel("data/Titanic.xlsx", na = "NA")
 head(titanic)
 ```
 

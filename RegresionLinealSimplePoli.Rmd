@@ -6,11 +6,6 @@ output:
   html_document:
     toc: yes
     toc_depth: 4
-  html_notebook: null
-  slidy_presentation:
-    incremental: yes
-  word_document:
-    toc: yes
 ---
 
 #### Notas sobre R
@@ -43,7 +38,7 @@ También deben descargar en su directorio ("folder") de trabajo, el archivo _mod
 Infección con malaria: número de parásitos en 1 ml de sangre en niños de diversas edades.
 
 ```{r datos.malaria}
-malaria <- read_excel("mod_empiricos.xlsx", 
+malaria <- read_excel("data/mod_empiricos.xlsx", 
     sheet = "malaria")
 #creando una tabla elegante
 datatable(malaria,
@@ -113,8 +108,8 @@ El procedimiento de regresión lineal asume que se cumplen algunos supuestos:
 
 ```{r normalidad}
 #Q-Q plot para las variables
-qqPlot(malaria$age, add.line = TRUE, points.col = "blue", line.col = "red")
-qqPlot(malaria$number, add.line = TRUE, points.col = "blue", line.col = "red")
+EnvStats::qqPlot(malaria$age, add.line = TRUE, points.col = "blue", line.col = "red")
+EnvStats::qqPlot(malaria$number, add.line = TRUE, points.col = "blue", line.col = "red")
 #prueba de Shapiro-Wilk
 shapiro.test(malaria$age)
 shapiro.test(malaria$number)
@@ -212,10 +207,10 @@ plot(malaria$age,residuals(rpol),
 ***
 
 Examinemos la nueva gráfica:
-```{r regpolgraf}
+```{r regpolgraf, message=FALSE, warning=FALSE}
 library(readxl)
 library(ggplot2)
-malaria <- read_excel("mod_empiricos.xlsx", 
+malaria <- read_excel("data/mod_empiricos.xlsx", 
     sheet = "malaria")
 ggplot(malaria, aes(x = age, y = number)) +
   geom_point(aes(x = age, y = number)) +

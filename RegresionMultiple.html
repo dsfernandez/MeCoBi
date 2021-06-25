@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+<meta name="author" content="D. S. Fernandez del Viso" />
+
+
+<title>MeCoBi: Modelos de Regresion Lineal Múltiple</title>
+
+<script src="site_libs/header-attrs-2.9/header-attrs.js"></script>
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/flatly.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<style>h1 {font-size: 34px;}
+       h1.title {font-size: 38px;}
+       h2 {font-size: 30px;}
+       h3 {font-size: 24px;}
+       h4 {font-size: 18px;}
+       h5 {font-size: 16px;}
+       h6 {font-size: 12px;}
+       code {color: inherit; background-color: rgba(0, 0, 0, 0.04);}
+       pre:not([class]) { background-color: white }</style>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<link href="site_libs/font-awesome-5.1.0/css/all.css" rel="stylesheet" />
+<link href="site_libs/font-awesome-5.1.0/css/v4-shims.css" rel="stylesheet" />
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+<style type="text/css">code{white-space: pre;}</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+pre code {
+  padding: 0;
+}
+</style>
+
+
+<style type="text/css">
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #adb5bd;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script type="text/javascript">
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.tab('show');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+
+  // Navbar adjustments
+  var navHeight = $(".navbar").first().height() + 15;
+  var style = document.createElement('style');
+  var pt = "padding-top: " + navHeight + "px; ";
+  var mt = "margin-top: -" + navHeight + "px; ";
+  var css = "";
+  // offset scroll position for anchor links (for fixed navbar)
+  for (var i = 1; i <= 6; i++) {
+    css += ".section h" + i + "{ " + pt + mt + "}\n";
+  }
+  style.innerHTML = "body {" + pt + "padding-bottom: 40px; }\n" + css;
+  document.head.appendChild(style);
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "&#xe258;";
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">MeCoBi</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="home.html">
+    <span class="fa fa-home"></span>
+     
+    Hola
+  </a>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    Modelos de Regresión
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="RegresionLinealSimplePoli.html">Regresión Lineal Simple</a>
+    </li>
+    <li>
+      <a href="RegLogistica.html">Regresión Logística</a>
+    </li>
+  </ul>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    Series de Tiempo
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="SeriesTiempo.html">Series de Tiempo</a>
+    </li>
+  </ul>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    Modelos Dinámicos
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="modelEpidem.html">Modelo Epidemiológico</a>
+    </li>
+    <li>
+      <a href="ModelMecODE-SIR-I.html">SIR-I</a>
+    </li>
+    <li>
+      <a href="ModelMecODE-SIR-II.html">SIR-II</a>
+    </li>
+  </ul>
+</li>
+<li class="dropdown-header">Modelos Espaciales</li>
+<li class="dropdown-header">Modelos Basados en Agentes</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div id="header">
+
+
+
+<h1 class="title toc-ignore">MeCoBi: Modelos de Regresion Lineal Múltiple</h1>
+<h4 class="author">D. S. Fernandez del Viso</h4>
+<h4 class="date">Septiembre 2019</h4>
+
+</div>
+
+<div id="TOC">
+<ul>
+<li><a href="#otro-modelo-con-menos-variables-y-con-interacción">Otro modelo con menos variables y con interacción</a></li>
+<li><a href="#modelo-con-las-dos-variables-más-correlacionadas-inicialmente">Modelo con las dos variables más correlacionadas inicialmente</a></li>
+</ul>
+</div>
+
+<p>#Regresión Múltiple Cuando tenemos más de una variable predictora (“independiente”"), la regresión lineal simple viene a ser una <strong>regresión múltiple</strong>. La regresión polinomial es un caso especial de regresión múltiple, en el cual una misma variable predictora se expresa en forma polinomial (<span class="math inline">\(X\ y\  X^2,\ por\ ejemplo\)</span>).</p>
+<p>En esta sección estaremos considerando el caso de variables predictoras diferentes, y combinaciones de las mismas.</p>
+<p>Usaremos el los datos <em>bmi</em> en el archivo <em>mod_empiricos.xlsx</em>. Estos son datos de individuos adultos entre 21 y 79 años, con las siguientes variables: <em>BMI</em>, índice de masa corporal (<span class="math inline">\(kg/m^{2}\)</span>); <em>Age</em>, edad (<em>años</em>); <em>Cholesterol</em>, niveles de colesterol en sangre, (<span class="math inline">\(mg/dL\)</span>); <em>Glucose</em>, niveles de glucosa en la sangre, (<span class="math inline">\(mg/dL\)</span>).</p>
+<pre class="r"><code>library(readxl)
+reg.multiple &lt;- read_excel(&quot;data/mod_empiricos.xlsx&quot;, 
+                            sheet = &quot;bmi&quot;)
+head(reg.multiple)</code></pre>
+<pre><code>## # A tibble: 6 x 4
+##     BMI   Age Cholesterol Glucose
+##   &lt;dbl&gt; &lt;dbl&gt;       &lt;dbl&gt;   &lt;dbl&gt;
+## 1  19.3    21         178      95
+## 2  24.5    57         250      98
+## 3  24.7    46         176     102
+## 4  47.9    47         171     105
+## 5  44.2    61         222     101
+## 6  29.9    74         156      72</code></pre>
+<hr />
+<p>##Matriz de relación entre variables Un primer paso en el análisis de regresión múltiple, es examinar la relación entre dos variables a la vez. calcularemos los coeficientes de regresión y construiremos una matriz de gráficos de regresión.</p>
+<pre class="r"><code>library(car)
+#matriz de correlación
+cor(reg.multiple)</code></pre>
+<pre><code>##                   BMI       Age Cholesterol    Glucose
+## BMI         1.0000000 0.1863333  0.28110580 0.22115998
+## Age         0.1863333 1.0000000  0.16966704 0.26705577
+## Cholesterol 0.2811058 0.1696670  1.00000000 0.08266412
+## Glucose     0.2211600 0.2670558  0.08266412 1.00000000</code></pre>
+<pre class="r"><code>#gráfica de regresiones en parejas, con línea de regresión
+scatterplotMatrix(reg.multiple, ~ BMI + Age + Cholesterol + Glucose,
+                  smooth = list(lty = 2), id = TRUE,
+                  regLine = list(lty = 1, col = &quot;red&quot;),
+                  col = &quot;blue&quot;)</code></pre>
+<p><img src="RegresionMultiple_files/figure-html/matriz%20de%20regresion-1.png" width="672" /></p>
+<hr />
+<p>###Interpretación de la gráfica</p>
+<ul>
+<li><p>podemos observar la distribución de los valores de cada variable: curva de densidad, y ‘alfombra’ de distribución.</p></li>
+<li><p>muestra los gráficos de puntos por pareja de variable (las unidades de los ejes se encuentran a los extremos de filas y columnas).</p></li>
+<li><p>la línea de la regresión lineal simple aparece en rojo.</p></li>
+<li><p>las líneas punteadas muestran una franja de ajuste no-paramétrico de los datos.</p></li>
+<li><p>los puntos identificados son los que más se alejan del centro de los datos (distancia de Mahalonobis).</p></li>
+</ul>
+<hr />
+<p>##Modelo de regresión múltiple Ahora debemos seleccionar la variable dependiente, y establecer un modelo de regresión múltiple, para evaluarlo estadísticamente. Usaremos como variable dependiente al índice de masa corporal (<em>BMI</em>) y el procedimiento <strong>lm()</strong> de R.</p>
+<pre class="r"><code>modRM &lt;- lm(BMI ~ Age + Cholesterol + Glucose, 
+              data = reg.multiple)
+summary(modRM)</code></pre>
+<pre><code>## 
+## Call:
+## lm(formula = BMI ~ Age + Cholesterol + Glucose, data = reg.multiple)
+## 
+## Residuals:
+##      Min       1Q   Median       3Q      Max 
+## -10.6255  -4.5473  -0.8179   3.7439  18.8116 
+## 
+## Coefficients:
+##             Estimate Std. Error t value Pr(&gt;|t|)   
+## (Intercept) 16.81510    5.07180   3.315  0.00164 **
+## Age          0.04103    0.05631   0.729  0.46939   
+## Cholesterol  0.04819    0.02487   1.938  0.05791 . 
+## Glucose      0.01974    0.01493   1.322  0.19188   
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Residual standard error: 6.34 on 54 degrees of freedom
+## Multiple R-squared:  0.127,  Adjusted R-squared:  0.07855 
+## F-statistic:  2.62 on 3 and 54 DF,  p-value: 0.06008</code></pre>
+<pre class="r"><code>ncvTest(modRM)</code></pre>
+<pre><code>## Non-constant Variance Score Test 
+## Variance formula: ~ fitted.values 
+## Chisquare = 0.02932531, Df = 1, p = 0.86403</code></pre>
+<pre class="r"><code>spreadLevelPlot(modRM)</code></pre>
+<p><img src="RegresionMultiple_files/figure-html/regresion.multiple-1.png" width="672" /></p>
+<pre><code>## 
+## Suggested power transformation:  0.757141</code></pre>
+<hr />
+<p>###Análisis de los resultados</p>
+<ul>
+<li><p>los residuales muestran una distribución algo sesgada hacia valores negativos.</p></li>
+<li><p>los estimados de los coeficientes resultaron positivos.</p></li>
+<li><p>el valor del intercepto es significativamente diferente de 0 (poco probable que la línea corte el origen).</p></li>
+<li><p>solamente el estimado del coeficiente para la variable <em>Cholesterol</em> es marginalmente significativo, o sea diferente de 0 (Pr = 0.05791).</p></li>
+<li><p>el <strong>coeficiente de determinación (<span class="math inline">\(R^{2}\)</span>)</strong> nos indica la proporción de la variación en la variable dependiente que es explicada por las variables independientes, y encontranmos que es de 0.127 (12.7 %) solamente.</p></li>
+<li><p>el <strong>estadístico F</strong> (que prueba si en conjunto el modelo tiene una respuesta diferente de 0, debida a los coeficientes) resultó no-significativo, si consideramos el usual nivel de P = 0.05.</p></li>
+<li><p>la prueba de <strong>homocedasticidad</strong> (varianza igual de los errores de las predicciones) indica que si se cumple este supuesto, y se corrobora en la gráfica con una línea horizontal ajustada a los residuales.</p></li>
+</ul>
+<hr />
+<p>##Modelo con interacciones entre las variables predictoras A partir de los resultados anteriores, vamos a considerar un modelo en el cual incorporemos las posibles interacciones entre variables. Una manera de hacerlo es creando variables en las que dos (o más) variables producen una variable de interacción, es decir que su efecto combinado es mayor que estando separadas.</p>
+<pre class="r"><code>modRI &lt;- lm(BMI ~ Age + Cholesterol + Glucose + Cholesterol*Glucose, 
+              data = reg.multiple)
+summary(modRI)</code></pre>
+<pre><code>## 
+## Call:
+## lm(formula = BMI ~ Age + Cholesterol + Glucose + Cholesterol * 
+##     Glucose, data = reg.multiple)
+## 
+## Residuals:
+##      Min       1Q   Median       3Q      Max 
+## -10.9645  -4.6505  -0.4692   3.4753  18.6302 
+## 
+## Coefficients:
+##                       Estimate Std. Error t value Pr(&gt;|t|)
+## (Intercept)         -0.9488128 16.7669069  -0.057    0.955
+## Age                  0.0349834  0.0564484   0.620    0.538
+## Cholesterol          0.1443108  0.0899841   1.604    0.115
+## Glucose              0.1986009  0.1616392   1.229    0.225
+## Cholesterol:Glucose -0.0009461  0.0008514  -1.111    0.271
+## 
+## Residual standard error: 6.326 on 53 degrees of freedom
+## Multiple R-squared:  0.1469, Adjusted R-squared:  0.08254 
+## F-statistic: 2.282 on 4 and 53 DF,  p-value: 0.07258</code></pre>
+<pre class="r"><code>ncvTest(modRI)</code></pre>
+<pre><code>## Non-constant Variance Score Test 
+## Variance formula: ~ fitted.values 
+## Chisquare = 0.001354017, Df = 1, p = 0.97065</code></pre>
+<pre class="r"><code>spreadLevelPlot(modRI)</code></pre>
+<p><img src="RegresionMultiple_files/figure-html/interacciones-1.png" width="672" /></p>
+<pre><code>## 
+## Suggested power transformation:  2.533026</code></pre>
+<hr />
+<p>###Análisis de los resultados</p>
+<ul>
+<li><p>con este nuevo modelo con interacción, ninguno de los coeficientes resultó significativamente diferente de 0.</p></li>
+<li><p>el <span class="math inline">\(R^{2}\)</span> y el ajustado, aumentaron ligeramente, pero esto es usual al aumentar el número de variables, lo cual empieza realmente a sobre-ajustar la variación aleatoria al modelo.</p></li>
+<li><p>la prueba de igualdad de varianza de los errores de las predicciones, aunque indica que se cumple el supuesto, la gráfica muestra alguna desviación de la horizontal.</p></li>
+<li><p>la selección de un modelo y sus variables es un proceso sin una regla fija.</p></li>
+</ul>
+<hr />
+<div id="otro-modelo-con-menos-variables-y-con-interacción" class="section level2">
+<h2>Otro modelo con menos variables y con interacción</h2>
+<pre class="r"><code>library(car)
+modRI &lt;- lm(BMI ~ Cholesterol + Age*Glucose, data = reg.multiple)
+summary(modRI)</code></pre>
+<pre><code>## 
+## Call:
+## lm(formula = BMI ~ Cholesterol + Age * Glucose, data = reg.multiple)
+## 
+## Residuals:
+##      Min       1Q   Median       3Q      Max 
+## -10.5672  -4.6458  -0.8474   3.7134  18.9200 
+## 
+## Coefficients:
+##               Estimate Std. Error t value Pr(&gt;|t|)  
+## (Intercept) 20.1718088  9.6804098   2.084   0.0420 *
+## Cholesterol  0.0494457  0.0252531   1.958   0.0555 .
+## Age         -0.0235489  0.1680250  -0.140   0.8891  
+## Glucose     -0.0162039  0.0893022  -0.181   0.8567  
+## Age:Glucose  0.0006341  0.0015529   0.408   0.6847  
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Residual standard error: 6.389 on 53 degrees of freedom
+## Multiple R-squared:  0.1298, Adjusted R-squared:  0.06411 
+## F-statistic: 1.976 on 4 and 53 DF,  p-value: 0.1115</code></pre>
+<pre class="r"><code>ncvTest(modRI)</code></pre>
+<pre><code>## Non-constant Variance Score Test 
+## Variance formula: ~ fitted.values 
+## Chisquare = 0.06073413, Df = 1, p = 0.80534</code></pre>
+<pre class="r"><code>spreadLevelPlot(modRI)</code></pre>
+<p><img src="RegresionMultiple_files/figure-html/interaccion2-1.png" width="672" /></p>
+<pre><code>## 
+## Suggested power transformation:  0.7963235</code></pre>
+</div>
+<div id="modelo-con-las-dos-variables-más-correlacionadas-inicialmente" class="section level2">
+<h2>Modelo con las dos variables más correlacionadas inicialmente</h2>
+<pre class="r"><code>modRI &lt;- lm(BMI ~ Cholesterol + Glucose, data = reg.multiple)
+summary(modRI)</code></pre>
+<pre><code>## 
+## Call:
+## lm(formula = BMI ~ Cholesterol + Glucose, data = reg.multiple)
+## 
+## Residuals:
+##     Min      1Q  Median      3Q     Max 
+## -10.125  -4.748  -1.134   3.321  18.832 
+## 
+## Coefficients:
+##             Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept) 17.95236    4.80502   3.736 0.000446 ***
+## Cholesterol  0.05098    0.02447   2.083 0.041902 *  
+## Glucose      0.02254    0.01437   1.569 0.122449    
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Residual standard error: 6.313 on 55 degrees of freedom
+## Multiple R-squared:  0.1185, Adjusted R-squared:  0.08641 
+## F-statistic: 3.696 on 2 and 55 DF,  p-value: 0.0312</code></pre>
+<pre class="r"><code>ncvTest(modRI)</code></pre>
+<pre><code>## Non-constant Variance Score Test 
+## Variance formula: ~ fitted.values 
+## Chisquare = 0.2490362, Df = 1, p = 0.61775</code></pre>
+<pre class="r"><code>spreadLevelPlot(modRI)</code></pre>
+<p><img src="RegresionMultiple_files/figure-html/dosvariables-1.png" width="672" /></p>
+<pre><code>## 
+## Suggested power transformation:  1.818741</code></pre>
+<p>##Comparando modelos</p>
+<p>Una manera de comparar visualmente modelos (en realidad sus coeficientes) es usar el paquete <strong>coefplot</strong>, en conjunto con <strong>ggplot2</strong>, para crear una gráfica de los coeficientes estimados de cada variable (sola o de interacción), en cada modelo y detectar los que son diferentes de 0, y los modelos que los contienen.</p>
+<pre class="r"><code>library(ggplot2)
+library(coefplot)
+#cálculo para todos los modelos
+modbmi1 &lt;- lm(BMI ~ Age + Cholesterol + Glucose, data=reg.multiple)
+modbmi2 &lt;- lm(BMI ~ Age + Glucose + Cholesterol + Glucose*Cholesterol, data=reg.multiple)
+modbmi3 &lt;- lm(BMI ~ Cholesterol + Age*Glucose, data=reg.multiple)
+modbmi4 &lt;- lm(BMI ~ Cholesterol + Glucose, data=reg.multiple)
+#comparando coeficientes de todos los modelos
+multiplot(modbmi1, modbmi2, modbmi3, modbmi4, pointSize = 2, intercept=FALSE)</code></pre>
+<pre><code>## Warning: It is deprecated to specify `guide = FALSE` to remove a guide. Please
+## use `guide = &quot;none&quot;` instead.
+
+## Warning: It is deprecated to specify `guide = FALSE` to remove a guide. Please
+## use `guide = &quot;none&quot;` instead.</code></pre>
+<p><img src="RegresionMultiple_files/figure-html/coefplot-1.png" width="672" /></p>
+<hr />
+<p>##Selección de modelos por pasos</p>
+<p>Existen métodos para seleccionar automáticamente el mejor modelo, a base de estadísticos indicadores, y que conlleva un procedimiento iterativo. Uno de estos procedimientos es conocido como ‘stepwise’ (por pasos), y aunque no es el más aceptado en la actualidad, ha sido muy usado y es una buena manera de ilustrar el procedimiento, usando nuestros datos.</p>
+<pre class="r"><code>#formulación de un modelo nulo y un modelo completo
+modNulo &lt;- lm(BMI ~ 1, data = reg.multiple)
+modFull &lt;- lm(BMI ~ Age + Cholesterol + Glucose + Age*Cholesterol + Age*Glucose + Cholesterol*Glucose, 
+              data = reg.multiple)
+#procedimiento stepwise
+bmistep &lt;- step(modNulo,
+                scope = list(lower=modNulo, upper=modFull,
+                             direction=&quot;both&quot;))</code></pre>
+<pre><code>## Start:  AIC=219.97
+## BMI ~ 1
+## 
+##               Df Sum of Sq    RSS    AIC
+## + Cholesterol  1   196.462 2289.8 217.19
+## + Glucose      1   121.605 2364.6 219.06
+## + Age          1    86.322 2399.9 219.92
+## &lt;none&gt;                     2486.2 219.97
+## 
+## Step:  AIC=217.19
+## BMI ~ Cholesterol
+## 
+##               Df Sum of Sq    RSS    AIC
+## + Glucose      1    98.063 2191.7 216.66
+## &lt;none&gt;                     2289.8 217.19
+## + Age          1    49.203 2240.6 217.93
+## - Cholesterol  1   196.462 2486.2 219.97
+## 
+## Step:  AIC=216.66
+## BMI ~ Cholesterol + Glucose
+## 
+##                       Df Sum of Sq    RSS    AIC
+## &lt;none&gt;                             2191.7 216.66
+## + Cholesterol:Glucose  1    55.387 2136.3 217.17
+## - Glucose              1    98.063 2289.8 217.19
+## + Age                  1    21.337 2170.3 218.09
+## - Cholesterol          1   172.920 2364.6 219.06</code></pre>
+<pre class="r"><code>bmistep</code></pre>
+<pre><code>## 
+## Call:
+## lm(formula = BMI ~ Cholesterol + Glucose, data = reg.multiple)
+## 
+## Coefficients:
+## (Intercept)  Cholesterol      Glucose  
+##    17.95236      0.05098      0.02254</code></pre>
+<hr />
+<p>###Interpretación y selección del modelo</p>
+<ul>
+<li><p>el proceso de selección se basa en mantener el modelo con el menor valor del estadístico <strong>AIC</strong> (Akaike Information Criterion), que indica el modelo con la menor pérdida de información y mayor simplicidad.</p></li>
+<li><p>en el proceso se parte de un modelo nulo (no efecto de predictores) y hasta un modelo muy complejo, incluyendo interacciones.</p></li>
+<li><p>las variables se incluyen y quitan y cada vez se recalcula AIC, hasta obtener el modelo que mantiene el mínimo valor de AIC.</p></li>
+</ul>
+<pre class="r"><code>modST &lt;- lm(formula = BMI ~ Cholesterol + Glucose, data = reg.multiple)
+summary(modST)</code></pre>
+<pre><code>## 
+## Call:
+## lm(formula = BMI ~ Cholesterol + Glucose, data = reg.multiple)
+## 
+## Residuals:
+##     Min      1Q  Median      3Q     Max 
+## -10.125  -4.748  -1.134   3.321  18.832 
+## 
+## Coefficients:
+##             Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept) 17.95236    4.80502   3.736 0.000446 ***
+## Cholesterol  0.05098    0.02447   2.083 0.041902 *  
+## Glucose      0.02254    0.01437   1.569 0.122449    
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Residual standard error: 6.313 on 55 degrees of freedom
+## Multiple R-squared:  0.1185, Adjusted R-squared:  0.08641 
+## F-statistic: 3.696 on 2 and 55 DF,  p-value: 0.0312</code></pre>
+<hr />
+<p>##Selección usando R-cuadrado ajustado y Mallow’s Cp para mejores modelos</p>
+<p>Otro método visual de selección, basado en el <span class="math inline">\(R^{2}-ajustado\)</span> y en Cp (Mallow’s Cp):</p>
+<pre class="r"><code>library(leaps)
+modCp &lt;- regsubsets(BMI ~ Age + Cholesterol + Glucose + Cholesterol*Glucose, data = reg.multiple, nbest = 2)
+plot(modCp, scale=&quot;adjr2&quot;)</code></pre>
+<p><img src="RegresionMultiple_files/figure-html/cp-1.png" width="672" /></p>
+<pre class="r"><code>plot(modCp, scale=&quot;Cp&quot;)</code></pre>
+<p><img src="RegresionMultiple_files/figure-html/cp-2.png" width="672" /></p>
+<p>###Interpretación</p>
+<p>El mejor modelo con R-cuadrado ajustado está en la parte superior, y contiene Cholesterol, Glucose y su interacción.</p>
+<p>Para el caso del estadístico Cp, al igual que con el AIC, el valor más bajo representa el mejor modelo, en este caso uno de Intercept, Cholesterol y Glucose. En general el valor de Cp se acerca al modelo con un número similar de parámetros (incluyendo el intercepto), en nuestro caso tres.</p>
+<hr />
+<p>##Referencias bibliográficas</p>
+<p>Kabacoff, R. I. 2015. R in Action. Data analysis and graphics with R. Manning Publications Co., Shelter Island, NY, USA.</p>
+<p>Lander, J. P. 2014. R for everyone. Pearson Education, Inc. Crawfordsville, Indiana, USA.</p>
+<p>Suárez, E., Pérez, C.M., Rivera, R., Martínez, M.N. 2017. Applications of Regression Models in Epidemiology. John Wiley &amp; Sons, Inc., Hoboken, New Jersey, USA.</p>
+</div>
+
+
+
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.odd').parent('tbody').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open');
+  });
+});
+</script>
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

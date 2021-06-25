@@ -6,13 +6,6 @@ output:
   html_document:
     toc: yes
     toc_depth: 4
-  slidy_presentation:
-    incremental: yes
-  pdf_document:
-    toc: yes
-  html_notebook: default
-  word_document:
-    toc: yes
 ---
 
 #Epidemiología
@@ -21,7 +14,7 @@ output:
 * usaremos definición amplia
 * triángulo de causalidad epidemiológica; originalmente para infecciones, pero lo vamos a utilizar de manera más general:
 ```{r image1, echo=FALSE, fig.cap="Triada Epidemiológica", out.width='100%'}
-knitr::include_graphics("epidemtriad.jpg")
+knitr::include_graphics("media/epidemtriad.jpg")
 ```
 ***
 
@@ -55,7 +48,7 @@ USOS:
 [Estudio de John Snow en la epidemia de cólera en Londres, 1854](https://en.wikipedia.org/wiki/1854_Broad_Street_cholera_outbreak)
 
 ```{r image2,echo=FALSE,fig.cap="Cólera en Londres",out.width='60%'}
-knitr::include_graphics("londoncholera.jpg")
+knitr::include_graphics("media/londoncholera.jpg")
 ```
 
 

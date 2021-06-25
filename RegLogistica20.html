@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+<meta name="author" content="D. S. Fernández del Viso" />
+
+
+<title>MeCoBi: Modelos de Regresión Logística</title>
+
+<script src="site_libs/header-attrs-2.9/header-attrs.js"></script>
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/flatly.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<style>h1 {font-size: 34px;}
+       h1.title {font-size: 38px;}
+       h2 {font-size: 30px;}
+       h3 {font-size: 24px;}
+       h4 {font-size: 18px;}
+       h5 {font-size: 16px;}
+       h6 {font-size: 12px;}
+       code {color: inherit; background-color: rgba(0, 0, 0, 0.04);}
+       pre:not([class]) { background-color: white }</style>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<link href="site_libs/font-awesome-5.1.0/css/all.css" rel="stylesheet" />
+<link href="site_libs/font-awesome-5.1.0/css/v4-shims.css" rel="stylesheet" />
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+<style type="text/css">code{white-space: pre;}</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+pre code {
+  padding: 0;
+}
+</style>
+
+
+<style type="text/css">
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #adb5bd;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script type="text/javascript">
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.tab('show');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+
+  // Navbar adjustments
+  var navHeight = $(".navbar").first().height() + 15;
+  var style = document.createElement('style');
+  var pt = "padding-top: " + navHeight + "px; ";
+  var mt = "margin-top: -" + navHeight + "px; ";
+  var css = "";
+  // offset scroll position for anchor links (for fixed navbar)
+  for (var i = 1; i <= 6; i++) {
+    css += ".section h" + i + "{ " + pt + mt + "}\n";
+  }
+  style.innerHTML = "body {" + pt + "padding-bottom: 40px; }\n" + css;
+  document.head.appendChild(style);
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "&#xe258;";
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">MeCoBi</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="home.html">
+    <span class="fa fa-home"></span>
+     
+    Hola
+  </a>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    Modelos de Regresión
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="RegresionLinealSimplePoli.html">Regresión Lineal Simple</a>
+    </li>
+    <li>
+      <a href="RegLogistica.html">Regresión Logística</a>
+    </li>
+  </ul>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    Series de Tiempo
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="SeriesTiempo.html">Series de Tiempo</a>
+    </li>
+  </ul>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    Modelos Dinámicos
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="modelEpidem.html">Modelo Epidemiológico</a>
+    </li>
+    <li>
+      <a href="ModelMecODE-SIR-I.html">SIR-I</a>
+    </li>
+    <li>
+      <a href="ModelMecODE-SIR-II.html">SIR-II</a>
+    </li>
+  </ul>
+</li>
+<li class="dropdown-header">Modelos Espaciales</li>
+<li class="dropdown-header">Modelos Basados en Agentes</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div id="header">
+
+
+
+<h1 class="title toc-ignore">MeCoBi: Modelos de Regresión Logística</h1>
+<h4 class="author">D. S. Fernández del Viso</h4>
+<h4 class="date">Septiembre 2020</h4>
+
+</div>
+
+<div id="TOC">
+<ul>
+<li><a href="#regresión-logística">Regresión Logística</a></li>
+<li><a href="#regresión-logística-vs.-lineal">Regresión Logística vs. Lineal</a></li>
+<li><a href="#odd-ratios-y-logit">‘Odd ratios’ y <em>logit</em></a></li>
+<li><a href="#modelo-de-regresión-logística">Modelo de Regresión Logística</a></li>
+<li><a href="#ejemplo-1-predicción-de-alta-presión-en-mujeres">EJEMPLO 1: Predicción de alta presión en mujeres</a></li>
+<li><a href="#modelo-logístico-con-glm">Modelo logístico con glm</a></li>
+<li><a href="#resultados-de-glm---prueba-de-hipótesis">Resultados de glm - prueba de hipótesis</a></li>
+<li><a href="#resultados---odd-ratios">Resultados - <em>odd ratios</em></a></li>
+<li><a href="#ejemplo-2-variables-predictoras-de-diabetes-tipo-2-en-una-población-de-nativos-pima">EJEMPLO 2: Variables predictoras de diabetes tipo 2, en una población de nativos Pima</a>
+<ul>
+<li><a href="#datos">Datos</a></li>
+</ul></li>
+<li><a href="#modelo-usando-glm---resultados">Modelo usando glm - resultados</a></li>
+<li><a href="#resultados-como-odd-ratios">Resultados como <em>odd ratios</em></a></li>
+<li><a href="#gráfica-logística-diabetes-vs-glucosa">Gráfica logística diabetes vs glucosa</a>
+<ul>
+<li><a href="#datos-1">Datos</a></li>
+<li><a href="#modelo-logistico">modelo logistico</a></li>
+</ul></li>
+</ul>
+</div>
+
+<div id="regresión-logística" class="section level1">
+<h1>Regresión Logística</h1>
+<p>En una <strong>regresión logística</strong> la variable respuesta (dependiente) es una <em>variable binaria</em> (dicótoma en términos generales), y las variables predictoras (independientes) pueden ser binarias, categóricas o continuas.</p>
+<hr />
+</div>
+<div id="regresión-logística-vs.-lineal" class="section level1">
+<h1>Regresión Logística vs. Lineal</h1>
+<p><strong>TUTORIAL</strong> <a href="https://www.machinelearningplus.com/machine-learning/logistic-regression-tutorial-examples-r/">Logistic Regression vs Linear Regression</a> <img src="linear_vs_logistic_regression.jpg" /></p>
+<p>Si se aplica una <strong>regresión lineal</strong> los valores de predicción de Y pueden exceder los límites 0 y 1.</p>
+<hr />
+</div>
+<div id="odd-ratios-y-logit" class="section level1">
+<h1>‘Odd ratios’ y <em>logit</em></h1>
+<p>Como la variable respuesta solo puede tener valores entre 0 o 1, y las variables independientes pueden ser continuas, con cualquier valor real, para formular un modelo de regresión logística se hace una transformación de probabilidades a ‘razones de probabilidades’ (en inglés <strong>odd ratios (ORs)</strong>), o proporción de casos favorables a desfavorables.</p>
+<p>La transformación tiene esta forma:</p>
+<p><span class="math display">\[OR_i = \frac{\pi}{1-\pi} \qquad (1)\]</span> donde <span class="math inline">\(\pi\)</span> es la probabilidad de que el evento dependiente (<span class="math inline">\(Y\)</span>) ocurra; luego se calcula el logaritmo del <span class="math inline">\(OR\)</span>, el cual se denomina <em>logit</em>:</p>
+<p><span class="math display">\[logit = log\frac{\pi}{1-\pi} \qquad (2)\]</span></p>
+<hr />
+</div>
+<div id="modelo-de-regresión-logística" class="section level1">
+<h1>Modelo de Regresión Logística</h1>
+<p>El modelo para la regresión, con dos variables independientes (<span class="math inline">\(x_1\)</span>, <span class="math inline">\(x_2\)</span>), es:</p>
+<p><span class="math display">\[logit=\beta_0 + x_1\beta_1 +x_2\beta_2\qquad (3)\]</span></p>
+<hr />
+</div>
+<div id="ejemplo-1-predicción-de-alta-presión-en-mujeres" class="section level1">
+<h1>EJEMPLO 1: Predicción de alta presión en mujeres</h1>
+<p>Vamos a explorar un modelo de diagnóstico de alta presión, a partir de datos de mujeres (n = 189), en relación a su edad, estado de menopausia, y el índice de masa corporal. Los datos están codificados como variables binarias:</p>
+<table>
+<thead>
+<tr class="header">
+<th align="left">Variables</th>
+<th align="left">Nombre</th>
+<th align="center">Código</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">Edad (años)</td>
+<td align="left">age</td>
+<td align="center">0:≤50, 1&gt;50</td>
+</tr>
+<tr class="even">
+<td align="left">Alta presión</td>
+<td align="left">dxhigh</td>
+<td align="center">0:no, 1:sí</td>
+</tr>
+<tr class="odd">
+<td align="left">BMI (kg/m2)</td>
+<td align="left">bmi</td>
+<td align="center">0:≤25, 1:&gt;25</td>
+</tr>
+<tr class="even">
+<td align="left">Menopausia</td>
+<td align="left">menop</td>
+<td align="center">0:pre-, 1:menopausia</td>
+</tr>
+</tbody>
+</table>
+<p>Para este modelo utilizaremos la función <strong>glm</strong> (general linear model):</p>
+<hr />
+</div>
+<div id="modelo-logístico-con-glm" class="section level1">
+<h1>Modelo logístico con glm</h1>
+<p>Se usa <strong>family = binomial()</strong>.</p>
+<pre class="r"><code>#modelo logístico:
+highbp &lt;- glm(dxhigh ~ age + bmi + menop, data = hbp,
+              family=binomial())</code></pre>
+<hr />
+</div>
+<div id="resultados-de-glm---prueba-de-hipótesis" class="section level1">
+<h1>Resultados de glm - prueba de hipótesis</h1>
+<pre class="r"><code>#resumen de los resultados:
+summary(highbp)</code></pre>
+<pre><code>## 
+## Call:
+## glm(formula = dxhigh ~ age + bmi + menop, family = binomial(), 
+##     data = hbp)
+## 
+## Deviance Residuals: 
+##     Min       1Q   Median       3Q      Max  
+## -1.0392  -0.8084  -0.6580   1.3222   2.0781  
+## 
+## Coefficients:
+##             Estimate Std. Error z value Pr(&gt;|z|)    
+## (Intercept)  -2.0367     0.4550  -4.476 7.61e-06 ***
+## age           0.6376     0.4920   1.296    0.195    
+## bmi           0.6165     0.4620   1.334    0.182    
+## menop         0.4484     0.4887   0.918    0.359    
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## (Dispersion parameter for binomial family taken to be 1)
+## 
+##     Null deviance: 218.39  on 188  degrees of freedom
+## Residual deviance: 206.60  on 185  degrees of freedom
+## AIC: 214.6
+## 
+## Number of Fisher Scoring iterations: 4</code></pre>
+<hr />
+</div>
+<div id="resultados---odd-ratios" class="section level1">
+<h1>Resultados - <em>odd ratios</em></h1>
+<pre class="r"><code>#obtener los coeficientes como ORs:
+exp(cbind(OR = coef(highbp), confint(highbp)))</code></pre>
+<pre><code>##                    OR     2.5 %    97.5 %
+## (Intercept) 0.1304608 0.0491431 0.2984743
+## age         1.8919266 0.7125247 4.9772745
+## bmi         1.8523471 0.7836975 4.9120329
+## menop       1.5658815 0.6016810 4.1448987</code></pre>
+<hr />
+</div>
+<div id="ejemplo-2-variables-predictoras-de-diabetes-tipo-2-en-una-población-de-nativos-pima" class="section level1">
+<h1>EJEMPLO 2: Variables predictoras de diabetes tipo 2, en una población de nativos Pima</h1>
+<p>En este caso las variables independientes no son binarias (0,1) sino datos continuos.</p>
+<div id="datos" class="section level3">
+<h3>Datos</h3>
+<pre class="r"><code># paquetes
+library(tidyverse)
+library(caret)
+library(mlbench)
+# cargar datos (estos son directamente del paquete mlbench, en su caso debe usar readxl o similar)
+data(&quot;PimaIndiansDiabetes2&quot;, package = &quot;mlbench&quot;)
+# inspeccionar los datos
+sample_n(PimaIndiansDiabetes2, 6)</code></pre>
+<pre><code>##     pregnant glucose pressure triceps insulin mass pedigree age diabetes
+## 638        2      94       76      18      66 31.6    0.649  23      neg
+## 498        2      81       72      15      76 30.1    0.547  25      neg
+## 52         1     101       50      15      36 24.2    0.526  26      neg
+## 519       13      76       60      NA      NA 32.8    0.180  41      neg
+## 197        1     105       58      NA      NA 24.3    0.187  21      neg
+## 394        4     116       72      12      87 22.1    0.463  37      neg</code></pre>
+<hr />
+</div>
+</div>
+<div id="modelo-usando-glm---resultados" class="section level1">
+<h1>Modelo usando glm - resultados</h1>
+<pre class="r"><code>library(MASS)
+# Fit the model
+model &lt;- glm(diabetes ~., data = PimaIndiansDiabetes2, family = binomial())
+# Summarize the final selected model
+summary(model)</code></pre>
+<pre><code>## 
+## Call:
+## glm(formula = diabetes ~ ., family = binomial(), data = PimaIndiansDiabetes2)
+## 
+## Deviance Residuals: 
+##     Min       1Q   Median       3Q      Max  
+## -2.7823  -0.6603  -0.3642   0.6409   2.5612  
+## 
+## Coefficients:
+##               Estimate Std. Error z value Pr(&gt;|z|)    
+## (Intercept) -1.004e+01  1.218e+00  -8.246  &lt; 2e-16 ***
+## pregnant     8.216e-02  5.543e-02   1.482  0.13825    
+## glucose      3.827e-02  5.768e-03   6.635 3.24e-11 ***
+## pressure    -1.420e-03  1.183e-02  -0.120  0.90446    
+## triceps      1.122e-02  1.708e-02   0.657  0.51128    
+## insulin     -8.253e-04  1.306e-03  -0.632  0.52757    
+## mass         7.054e-02  2.734e-02   2.580  0.00989 ** 
+## pedigree     1.141e+00  4.274e-01   2.669  0.00760 ** 
+## age          3.395e-02  1.838e-02   1.847  0.06474 .  
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## (Dispersion parameter for binomial family taken to be 1)
+## 
+##     Null deviance: 498.10  on 391  degrees of freedom
+## Residual deviance: 344.02  on 383  degrees of freedom
+##   (376 observations deleted due to missingness)
+## AIC: 362.02
+## 
+## Number of Fisher Scoring iterations: 5</code></pre>
+<hr />
+</div>
+<div id="resultados-como-odd-ratios" class="section level1">
+<h1>Resultados como <em>odd ratios</em></h1>
+<pre class="r"><code># odds
+exp(cbind(OR = coef(model), confint(model)))</code></pre>
+<pre><code>##                       OR        2.5 %       97.5 %
+## (Intercept) 4.358754e-05 3.548295e-06 0.0004258459
+## pregnant    1.085629e+00 9.743237e-01 1.2116311454
+## glucose     1.039011e+00 1.027717e+00 1.0513035403
+## pressure    9.985807e-01 9.757909e-01 1.0223068780
+## triceps     1.011285e+00 9.778466e-01 1.0457799522
+## insulin     9.991750e-01 9.966180e-01 1.0017675218
+## mass        1.073085e+00 1.017827e+00 1.1335373213
+## pedigree    3.129611e+00 1.378380e+00 7.3682727463
+## age         1.034535e+00 9.985446e-01 1.0735228530</code></pre>
+<hr />
+</div>
+<div id="gráfica-logística-diabetes-vs-glucosa" class="section level1">
+<h1>Gráfica logística diabetes vs glucosa</h1>
+<pre class="r"><code>library(ggplot2)
+#pasar datos de diabetes &quot;pos&quot; y &quot;neg&quot; a 1s y 0s
+diabetes01 &lt;- ifelse(PimaIndiansDiabetes2$diabetes == &quot;pos&quot;, 1, 0)
+#gráfica con curva logística
+ggplot(PimaIndiansDiabetes2, aes(x=glucose, y=diabetes01, na.rm = TRUE)) +
+  geom_point() +
+  geom_smooth(method = &quot;glm&quot;, 
+    method.args = list(family = &quot;binomial&quot;), 
+    se = TRUE)</code></pre>
+<p><img src="RegLogistica20_files/figure-html/unnamed-chunk-5-1.png" width="672" /> # TITANIC</p>
+<div id="datos-1" class="section level2">
+<h2>Datos</h2>
+<pre class="r"><code>library(readxl)
+titanic &lt;- read_excel(&quot;data/Titanic.xlsx&quot;, na = &quot;NA&quot;)
+head(titanic)</code></pre>
+<pre><code>## # A tibble: 6 x 12
+##   PassengerId Survived Pclass Name    Sex     Age SibSp Parch Ticket  Fare Cabin
+##         &lt;dbl&gt;    &lt;dbl&gt;  &lt;dbl&gt; &lt;chr&gt;   &lt;chr&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;  &lt;dbl&gt; &lt;chr&gt;
+## 1           1        0      3 Braund… male     22     1     0 A/5 2…  7.25 &lt;NA&gt; 
+## 2           2        1      1 Cuming… fema…    38     1     0 PC 17… 71.3  C85  
+## 3           3        1      3 Heikki… fema…    26     0     0 STON/…  7.92 &lt;NA&gt; 
+## 4           4        1      1 Futrel… fema…    35     1     0 113803 53.1  C123 
+## 5           5        0      3 Allen,… male     35     0     0 373450  8.05 &lt;NA&gt; 
+## 6           6        0      3 Moran,… male     NA     0     0 330877  8.46 &lt;NA&gt; 
+## # … with 1 more variable: Embarked &lt;chr&gt;</code></pre>
+</div>
+<div id="modelo-logistico" class="section level2">
+<h2>modelo logistico</h2>
+<pre class="r"><code>library(ggplot2)
+library(MASS)
+# Fit the model
+model_1 &lt;- glm(Survived ~ Pclass + Sex + Age + SibSp + Parch + Fare, data = titanic, family = binomial())
+# Summarize the selected model
+summary(model_1)</code></pre>
+<pre><code>## 
+## Call:
+## glm(formula = Survived ~ Pclass + Sex + Age + SibSp + Parch + 
+##     Fare, family = binomial(), data = titanic)
+## 
+## Deviance Residuals: 
+##     Min       1Q   Median       3Q      Max  
+## -2.7412  -0.5370  -0.3412   0.4798   2.6260  
+## 
+## Coefficients:
+##              Estimate Std. Error z value Pr(&gt;|z|)    
+## (Intercept)  5.194259   0.539640   9.625  &lt; 2e-16 ***
+## Pclass      -1.079980   0.147145  -7.340 2.14e-13 ***
+## Sexmale     -3.612642   0.206781 -17.471  &lt; 2e-16 ***
+## Age         -0.033917   0.007253  -4.676 2.92e-06 ***
+## SibSp       -0.361463   0.117951  -3.065  0.00218 ** 
+## Parch       -0.138610   0.112796  -1.229  0.21913    
+## Fare         0.002148   0.002050   1.048  0.29459    
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## (Dispersion parameter for binomial family taken to be 1)
+## 
+##     Null deviance: 1400.72  on 1044  degrees of freedom
+## Residual deviance:  795.65  on 1038  degrees of freedom
+##   (264 observations deleted due to missingness)
+## AIC: 809.65
+## 
+## Number of Fisher Scoring iterations: 5</code></pre>
+<pre class="r"><code># OD ratios
+exp(cbind(OR = coef(model_1), confint(model_1)))</code></pre>
+<pre><code>##                       OR       2.5 %       97.5 %
+## (Intercept) 180.23462168 63.89116107 531.22476412
+## Pclass        0.33960247  0.25344159   0.45171235
+## Sexmale       0.02698046  0.01777309   0.04001895
+## Age           0.96665153  0.95282043   0.98033246
+## SibSp         0.69665630  0.54983069   0.87403748
+## Parch         0.87056773  0.69527314   1.08480156
+## Fare          1.00215050  0.99820392   1.00641298</code></pre>
+<pre class="r"><code>#gráfica con curva logística
+ggplot(titanic, aes(x=Fare, y=Survived, na.rm = TRUE)) +
+  geom_point() +
+  geom_smooth(method = &quot;glm&quot;, 
+    method.args = list(family = &quot;binomial&quot;), 
+    se = TRUE)</code></pre>
+<p><img src="RegLogistica20_files/figure-html/unnamed-chunk-7-1.png" width="672" /></p>
+</div>
+</div>
+
+
+
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.odd').parent('tbody').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open');
+  });
+});
+</script>
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

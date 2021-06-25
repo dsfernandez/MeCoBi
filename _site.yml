@@ -7,10 +7,18 @@ navbar:
       href: home.html
     - text: "Modelos de Regresión"
       menu:
+      - text: "Regresión Lineal Simple"
+        href: RegresionLinealSimplePoli.html
+      - text: "Regresión Logística"
+        href: RegLogistica.html
     - text: "Series de Tiempo"
       menu:
+      - text: "Series de Tiempo"
+        href: SeriesTiempo.html
     - text: "Modelos Dinámicos"
       menu:
+      - text: "Modelo Epidemiológico"
+        href: modelEpidem.html
       - text: "SIR-I"
         href: ModelMecODE-SIR-I.html
       - text: "SIR-II"
@@ -22,6 +30,6 @@ navbar:
 output_dir: "."
 output:
   html_document:
-    theme: cosmo
+    theme: flatly
     highlight: textmate
 

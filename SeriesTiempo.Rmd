@@ -6,11 +6,6 @@ output:
   html_document:
     toc: yes
     toc_depth: 4
-  html_notebook: null
-  slidy_presentation:
-    incremental: yes
-  word_document:
-    toc: yes
 ---
 #Series de Tiempo
 
@@ -18,7 +13,7 @@ output:
 ```{r seriest, message=FALSE}
 #datos San_Juan_Training_Data
 library(readr)
-sanjuan_dengue <- read_csv("San_Juan_Training_Data.csv")
+sanjuan_dengue <- read_csv("data/San_Juan_Training_Data.csv")
 #crear objeto ts
 tsdengue <- ts(sanjuan_dengue$total_cases, start = c(1990, 4), end = c(2009, 4), frequency = 52)
 max(tsdengue)

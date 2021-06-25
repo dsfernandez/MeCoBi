@@ -6,11 +6,6 @@ output:
   html_document:
     toc: yes
     toc_depth: 4
-  html_notebook: null
-  slidy_presentation:
-    incremental: yes
-  word_document:
-    toc: yes
 ---
 #Regresión Múltiple
 Cuando tenemos más de una variable predictora ("independiente""), la regresión lineal simple viene a ser una __regresión múltiple__. La regresión polinomial es un caso especial de regresión múltiple, en el cual una misma variable predictora se expresa en forma polinomial ($X\ y\  X^2,\ por\ ejemplo$).
@@ -21,7 +16,7 @@ Usaremos el los datos _bmi_ en el archivo _mod_empiricos.xlsx_.  Estos son datos
 
 ```{r datos}
 library(readxl)
-reg.multiple <- read_excel("mod_empiricos.xlsx", 
+reg.multiple <- read_excel("data/mod_empiricos.xlsx", 
                             sheet = "bmi")
 head(reg.multiple)
 ```

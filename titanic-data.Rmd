@@ -7,7 +7,7 @@ output: html_document
 
 ```{r}
 library(readxl)
-hbp <- read_excel("mod_empiricos.xlsx", 
+hbp <- read_excel("data/mod_empiricos.xlsx", 
                             sheet = "hbp")
 ```
 

@@ -1,0 +1,767 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+<meta name="author" content="D. S. Fernandez del Viso" />
+
+
+<title>MeCoBi: Modelos de Regresion Lineal</title>
+
+<script src="site_libs/header-attrs-2.9/header-attrs.js"></script>
+<script src="site_libs/jquery-3.5.1/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/flatly.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<style>h1 {font-size: 34px;}
+       h1.title {font-size: 38px;}
+       h2 {font-size: 30px;}
+       h3 {font-size: 24px;}
+       h4 {font-size: 18px;}
+       h5 {font-size: 16px;}
+       h6 {font-size: 12px;}
+       code {color: inherit; background-color: rgba(0, 0, 0, 0.04);}
+       pre:not([class]) { background-color: white }</style>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<script src="site_libs/htmlwidgets-1.5.3/htmlwidgets.js"></script>
+<link href="site_libs/datatables-css-0.0.0/datatables-crosstalk.css" rel="stylesheet" />
+<script src="site_libs/datatables-binding-0.18/datatables.js"></script>
+<link href="site_libs/dt-core-1.10.20/css/jquery.dataTables.min.css" rel="stylesheet" />
+<link href="site_libs/dt-core-1.10.20/css/jquery.dataTables.extra.css" rel="stylesheet" />
+<script src="site_libs/dt-core-1.10.20/js/jquery.dataTables.min.js"></script>
+<link href="site_libs/nouislider-7.0.10/jquery.nouislider.min.css" rel="stylesheet" />
+<script src="site_libs/nouislider-7.0.10/jquery.nouislider.min.js"></script>
+<link href="site_libs/selectize-0.12.0/selectize.bootstrap3.css" rel="stylesheet" />
+<script src="site_libs/selectize-0.12.0/selectize.min.js"></script>
+<link href="site_libs/crosstalk-1.1.1/css/crosstalk.css" rel="stylesheet" />
+<script src="site_libs/crosstalk-1.1.1/js/crosstalk.min.js"></script>
+<link href="site_libs/font-awesome-5.1.0/css/all.css" rel="stylesheet" />
+<link href="site_libs/font-awesome-5.1.0/css/v4-shims.css" rel="stylesheet" />
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+<style type="text/css">code{white-space: pre;}</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+pre code {
+  padding: 0;
+}
+</style>
+
+
+<style type="text/css">
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #adb5bd;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script type="text/javascript">
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.tab('show');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+
+  // Navbar adjustments
+  var navHeight = $(".navbar").first().height() + 15;
+  var style = document.createElement('style');
+  var pt = "padding-top: " + navHeight + "px; ";
+  var mt = "margin-top: -" + navHeight + "px; ";
+  var css = "";
+  // offset scroll position for anchor links (for fixed navbar)
+  for (var i = 1; i <= 6; i++) {
+    css += ".section h" + i + "{ " + pt + mt + "}\n";
+  }
+  style.innerHTML = "body {" + pt + "padding-bottom: 40px; }\n" + css;
+  document.head.appendChild(style);
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "&#xe258;";
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">MeCoBi</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="home.html">
+    <span class="fa fa-home"></span>
+     
+    Hola
+  </a>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    Modelos de Regresión
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="RegresionLinealSimplePoli.html">Regresión Lineal Simple</a>
+    </li>
+    <li>
+      <a href="RegLogistica.html">Regresión Logística</a>
+    </li>
+  </ul>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    Series de Tiempo
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="SeriesTiempo.html">Series de Tiempo</a>
+    </li>
+  </ul>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    Modelos Dinámicos
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="modelEpidem.html">Modelo Epidemiológico</a>
+    </li>
+    <li>
+      <a href="ModelMecODE-SIR-I.html">SIR-I</a>
+    </li>
+    <li>
+      <a href="ModelMecODE-SIR-II.html">SIR-II</a>
+    </li>
+  </ul>
+</li>
+<li class="dropdown-header">Modelos Espaciales</li>
+<li class="dropdown-header">Modelos Basados en Agentes</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div id="header">
+
+
+
+<h1 class="title toc-ignore">MeCoBi: Modelos de Regresion Lineal</h1>
+<h4 class="author">D. S. Fernandez del Viso</h4>
+<h4 class="date">Agosto 2020</h4>
+
+</div>
+
+<div id="TOC">
+<ul>
+<li><a href="#notas-sobre-r">Notas sobre R</a></li>
+<li><a href="#modelos-empíricos">Modelos empíricos</a></li>
+<li><a href="#modelos-de-regresión">Modelos de Regresión</a></li>
+<li><a href="#regresión-lineal-simple">Regresión Lineal Simple</a>
+<ul>
+<li><a href="#pruebas-de-supuestos">Pruebas de supuestos</a>
+<ul>
+<li><a href="#prueba-de-normalidad-q-q-plot-y-shapiro-wilk">Prueba de normalidad: Q-Q plot y Shapiro-Wilk</a></li>
+<li><a href="#prueba-de-homocedasticidad">Prueba de homocedasticidad</a></li>
+</ul></li>
+<li><a href="#estimación-de-los-parámetros-del-modelo">Estimación de los parámetros del modelo</a></li>
+<li><a href="#estimados-de-los-parámetros-de-la-regresión-lineal-simple">Estimados de los parámetros de la regresión lineal simple</a></li>
+<li><a href="#examinando-el-modelo">Examinando el modelo</a>
+<ul>
+<li><a href="#residuales">Residuales</a></li>
+<li><a href="#intervalo-de-confianza">Intervalo de confianza</a></li>
+</ul></li>
+<li><a href="#mejorando-el-modelo-rls">Mejorando el Modelo RLS</a>
+<ul>
+<li><a href="#regresión-polinomial">Regresión Polinomial</a>
+<ul>
+<li><a href="#exceso-de-ajuste-overfitting">Exceso de ajuste (‘overfitting’)</a></li>
+</ul></li>
+</ul></li>
+<li><a href="#transformaciones">Transformaciones</a>
+<ul>
+<li><a href="#ejercicio">EJERCICIO</a></li>
+</ul></li>
+</ul></li>
+<li><a href="#referencias">Referencias</a></li>
+</ul>
+</div>
+
+<div id="notas-sobre-r" class="section level4">
+<h4>Notas sobre R</h4>
+<p>Deben tener previamente descargados los siguientes paquetes:</p>
+<pre class="r"><code>library(readxl)
+library(knitr)
+library(dplyr)
+library(DT)
+library(EnvStats)</code></pre>
+<p>También deben descargar en su directorio (“folder”) de trabajo, el archivo <em>mod_empiricos.xlsx</em> que se encuentra en la carpeta del tema.</p>
+</div>
+<div id="modelos-empíricos" class="section level1">
+<h1>Modelos empíricos</h1>
+<ul>
+<li><p><em>“An empirical model is based only on data and is used to predict, not explain, a system. An empirical model consists of a function that captures the trend of the data.”</em> (Shiflet, 2014)</p></li>
+<li><p>Los datos utilizados en un modelo empírico provienen de experimentos u observaciones y mediciones de las variables de interés, en los sujetos bajo estudio y/o su ambiente.</p></li>
+</ul>
+<hr />
+</div>
+<div id="modelos-de-regresión" class="section level1">
+<h1>Modelos de Regresión</h1>
+<ul>
+<li><p>En un <a href="https://drive.google.com/open?id=14DAqQ8KS8pceb3ynp1AbopW9ilekFoZw">modelo de regresión</a>, además de la posible asociación entre variables o correlación, establecemos una relación de causalidad entre una variable respuesta y una (regresión simple) o más (regresión múltiple) variables independientes.</p></li>
+<li><p>Estaremos utilizando la regresión como una función, para capturar la tendencia y el ajuste de los datos. En un modelo de regresión, además de la estimación de los parámetros del modelo, podemos evaluar estadísticamente (mediante pruebas de hipótesis) el nivel de significancia de nuestro modelo, en comparación con un modelo de no relación entre las variables (o hipótesis nula).</p></li>
+</ul>
+</div>
+<div id="regresión-lineal-simple" class="section level1">
+<h1>Regresión Lineal Simple</h1>
+<p><span style="color:red"> <strong>Ejemplo 1</strong>: </span> Infección con malaria: número de parásitos en 1 ml de sangre en niños de diversas edades.</p>
+<pre class="r"><code>malaria &lt;- read_excel(&quot;data/mod_empiricos.xlsx&quot;, 
+    sheet = &quot;malaria&quot;)
+#creando una tabla elegante
+datatable(malaria,
+          filter = &#39;top&#39;, options = list(
+            pageLength = 15, autoWidth = TRUE
+          ))</code></pre>
+<div id="htmlwidget-dd36c66883b575ea30f4" style="width:100%;height:auto;" class="datatables html-widget"></div>
+<script type="application/json" data-for="htmlwidget-dd36c66883b575ea30f4">{"x":{"filter":"top","filterHTML":"<tr>\n  <td><\/td>\n  <td data-type=\"number\" style=\"vertical-align: top;\">\n    <div class=\"form-group has-feedback\" style=\"margin-bottom: auto;\">\n      <input type=\"search\" placeholder=\"All\" class=\"form-control\" style=\"width: 100%;\"/>\n      <span class=\"glyphicon glyphicon-remove-circle form-control-feedback\"><\/span>\n    <\/div>\n    <div style=\"display: none; position: absolute; width: 200px;\">\n      <div data-min=\"8\" data-max=\"16\"><\/div>\n      <span style=\"float: left;\"><\/span>\n      <span style=\"float: right;\"><\/span>\n    <\/div>\n  <\/td>\n  <td data-type=\"number\" style=\"vertical-align: top;\">\n    <div class=\"form-group has-feedback\" style=\"margin-bottom: auto;\">\n      <input type=\"search\" placeholder=\"All\" class=\"form-control\" style=\"width: 100%;\"/>\n      <span class=\"glyphicon glyphicon-remove-circle form-control-feedback\"><\/span>\n    <\/div>\n    <div style=\"display: none; position: absolute; width: 200px;\">\n      <div data-min=\"37\" data-max=\"2662\"><\/div>\n      <span style=\"float: left;\"><\/span>\n      <span style=\"float: right;\"><\/span>\n    <\/div>\n  <\/td>\n<\/tr>","data":[["1","2","3","4","5","6","7","8","9","10","11","12","13"],[12,8,16,8,11,10,12,13,15,14,14,15,15],[730,143,2275,37,535,465,690,826,1340,1580,1340,1925,2662]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>age<\/th>\n      <th>number<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"pageLength":15,"autoWidth":true,"columnDefs":[{"className":"dt-right","targets":[1,2]},{"orderable":false,"targets":0}],"order":[],"orderClasses":false,"orderCellsTop":true,"lengthMenu":[10,15,25,50,100]}},"evals":[],"jsHooks":[]}</script>
+<pre class="r"><code>#si no funciona el anterior, algo más sencillo
+kable(malaria)</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th align="right">age</th>
+<th align="right">number</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="right">12</td>
+<td align="right">730</td>
+</tr>
+<tr class="even">
+<td align="right">8</td>
+<td align="right">143</td>
+</tr>
+<tr class="odd">
+<td align="right">16</td>
+<td align="right">2275</td>
+</tr>
+<tr class="even">
+<td align="right">8</td>
+<td align="right">37</td>
+</tr>
+<tr class="odd">
+<td align="right">11</td>
+<td align="right">535</td>
+</tr>
+<tr class="even">
+<td align="right">10</td>
+<td align="right">465</td>
+</tr>
+<tr class="odd">
+<td align="right">12</td>
+<td align="right">690</td>
+</tr>
+<tr class="even">
+<td align="right">13</td>
+<td align="right">826</td>
+</tr>
+<tr class="odd">
+<td align="right">15</td>
+<td align="right">1340</td>
+</tr>
+<tr class="even">
+<td align="right">14</td>
+<td align="right">1580</td>
+</tr>
+<tr class="odd">
+<td align="right">14</td>
+<td align="right">1340</td>
+</tr>
+<tr class="even">
+<td align="right">15</td>
+<td align="right">1925</td>
+</tr>
+<tr class="odd">
+<td align="right">15</td>
+<td align="right">2662</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<p>##Modelo básico Supongamos que hay una variable cuantitativa <span class="math inline">\(X\)</span> que nos puede dar información de <span class="math inline">\(Y\)</span>, entonces podemos explicar el valor esperado de <span class="math inline">\(Y\)</span> (<span class="math inline">\(\mu_{Y|X}\)</span>), en su más simple expresión, utilizando la siguiente ecuación:</p>
+<p><span class="math display">\[\mu_{Y|X} = \beta_0 +\beta_1X\qquad(1)\]</span> Y en su forma operativa, tenemos la siguiente ecuación para un modelo de regresión lineal simple:</p>
+<p><span class="math display">\[y_i = \beta_0 + \beta_1x_i + e_i\qquad(2)\]</span> donde:</p>
+<blockquote>
+<p><span class="math inline">\(y_i\)</span> indica el valor específico de <span class="math inline">\(Y\)</span> para el <em>i-ésimo</em> dato<br />
+<span class="math inline">\(\beta_0\)</span> indica el valor esperado de <span class="math inline">\(Y\)</span> cuando <span class="math inline">\(X = 0\)</span> (<strong>intercepto</strong> de la regresión)<br />
+<span class="math inline">\(\beta_1\)</span> indica el parámetro asociado a la variable predictora <span class="math inline">\(X\)</span> (<strong>pendiente</strong> de la regresión); representa el cambio en el valor esperado de <span class="math inline">\(Y\)</span> por unidad de cambio de <span class="math inline">\(X\)</span><br />
+<span class="math inline">\(x_i\)</span> indica el valor específico de <span class="math inline">\(X\)</span> para el <em>i-ésimo</em> dato<br />
+<span class="math inline">\(e_i\)</span> indica el error aleatorio para el <em>i-ésimo</em> dato</p>
+</blockquote>
+<hr />
+<p>###EJERCICIO 1: Representación gráfica de datos y definición de variables Volviendo a los datos de malaria en niños, nos preguntamos que relación existe entre la edad de los niños y el nivel de infección en la sangre, con el parásito.</p>
+<ul>
+<li>Primero debemos establecer cómo es la relación de causalidad.</li>
+<li>Proponemos el siguiente modelo:</li>
+</ul>
+<blockquote>
+<p>número de parásitos en la sangre (<span class="math inline">\(Y\)</span>) = número de parásitos al nacer <span class="math inline">\(\beta_0\)</span> + cambio en número de parásitos por unidad de edad (<span class="math inline">\(\beta_1\)</span>) x edad (<span class="math inline">\(X\)</span>)</p>
+</blockquote>
+<blockquote>
+<p>no escribimos el error esperado, pero sabemos que está contenido en el modelo, como desviación (aleatoria e independiente) del verdadero valor de <span class="math inline">\(Y\)</span> dado el valor de <span class="math inline">\(X\)</span></p>
+</blockquote>
+<hr />
+<p>##Gráfica de los datos</p>
+<pre class="r"><code>plot(malaria$age, malaria$number, type = &quot;p&quot;,
+     xlim = c(7,17),
+     xlab = &quot;Edad (años)&quot;, 
+     ylab = &quot;Número de parásitos en 1 ml de sangre&quot;, 
+     asp = NA)</code></pre>
+<p><img src="RegresionLinealSimplePoli_files/figure-html/grafica.malaria-1.png" width="672" /></p>
+<hr />
+<p>##Supuestos para la regresión lineal El procedimiento de regresión lineal asume que se cumplen algunos supuestos:</p>
+<ul>
+<li><em>Relación lineal</em>: la función (aunque no los datos, que pueden ser transformados) que define la relación entre las variables debe producir una línea recta.<br />
+</li>
+<li><em>Normalidad multivariada</em>: asume que los residuales están normalmente distribuidos.<br />
+</li>
+<li><em>No multicolinearidad</em>: cuando hay más de una variable independiente, que no estén altamente correlacionadas entre ellas.<br />
+</li>
+<li><em>No autocorrelación</em>: no debe observarse correlación entre los valores de una misma variable; se detecta en los residuales.<br />
+</li>
+<li><em>Homocedasticidad</em>: las varianzas de los residuales deben mantenerse similares.</li>
+</ul>
+<hr />
+<div id="pruebas-de-supuestos" class="section level3">
+<h3>Pruebas de supuestos</h3>
+<div id="prueba-de-normalidad-q-q-plot-y-shapiro-wilk" class="section level4">
+<h4>Prueba de normalidad: Q-Q plot y Shapiro-Wilk</h4>
+<pre class="r"><code>#Q-Q plot para las variables
+EnvStats::qqPlot(malaria$age, add.line = TRUE, points.col = &quot;blue&quot;, line.col = &quot;red&quot;)</code></pre>
+<p><img src="RegresionLinealSimplePoli_files/figure-html/normalidad-1.png" width="672" /></p>
+<pre class="r"><code>EnvStats::qqPlot(malaria$number, add.line = TRUE, points.col = &quot;blue&quot;, line.col = &quot;red&quot;)</code></pre>
+<p><img src="RegresionLinealSimplePoli_files/figure-html/normalidad-2.png" width="672" /></p>
+<pre class="r"><code>#prueba de Shapiro-Wilk
+shapiro.test(malaria$age)</code></pre>
+<pre><code>## 
+##  Shapiro-Wilk normality test
+## 
+## data:  malaria$age
+## W = 0.91503, p-value = 0.2148</code></pre>
+<pre class="r"><code>shapiro.test(malaria$number)</code></pre>
+<pre><code>## 
+##  Shapiro-Wilk normality test
+## 
+## data:  malaria$number
+## W = 0.94677, p-value = 0.5503</code></pre>
+<hr />
+</div>
+<div id="prueba-de-homocedasticidad" class="section level4">
+<h4>Prueba de homocedasticidad</h4>
+<p>Para probar si la varianza de los residuales es constante, es decir que poseen <em>homocedasticidad</em>, utilizamos la prueba <a href="https://www.statisticshowto.datasciencecentral.com/goldfeld-quandt-test/">Goldfeld-Quandt</a>, con una <span class="math inline">\(H_0:igualdad\:de\:varianza\)</span>, entre dos grupos de valores de residuales.</p>
+<pre class="r"><code>#Goldfeld-Quandt test
+#Ho: varianzas iguales entre grupos de datos (baja y alta edad)
+library(lmtest)</code></pre>
+<pre><code>## Loading required package: zoo</code></pre>
+<pre><code>## 
+## Attaching package: &#39;zoo&#39;</code></pre>
+<pre><code>## The following objects are masked from &#39;package:base&#39;:
+## 
+##     as.Date, as.Date.numeric</code></pre>
+<pre class="r"><code>gqtest(lm(formula = number ~ age, data = malaria))</code></pre>
+<pre><code>## 
+##  Goldfeld-Quandt test
+## 
+## data:  lm(formula = number ~ age, data = malaria)
+## GQ = 3.6893, df1 = 5, df2 = 4, p-value = 0.115
+## alternative hypothesis: variance increases from segment 1 to 2</code></pre>
+<hr />
+</div>
+</div>
+<div id="estimación-de-los-parámetros-del-modelo" class="section level2">
+<h2>Estimación de los parámetros del modelo</h2>
+<p>Usaremos el método de los <a href="https://drive.google.com/open?id=1pDIstb6t3mjBge0c2hT_UcX_p0BPBvOt">cuadrados-mínimos</a> (‘least-squares’) para estimar los parámetros del modelo. Este método se basa en encontrar los parámetros <span class="math inline">\(\beta_0\)</span> y <span class="math inline">\(\beta_1\)</span> que minimicen la siguiente función:</p>
+<p><span class="math display">\[S(\beta_0, \beta_1) = \sum {e_i}^2 = \sum (y_i - \beta_0 - \beta_1x_i)^2\]</span></p>
+<hr />
+</div>
+<div id="estimados-de-los-parámetros-de-la-regresión-lineal-simple" class="section level2">
+<h2>Estimados de los parámetros de la regresión lineal simple</h2>
+<p>Usando el procedimiento <strong>lm</strong> en R podemos estimar los parámetros del modelo.</p>
+<pre class="r"><code>rls &lt;- lm(malaria$number ~ malaria$age)
+summary(rls)</code></pre>
+<pre><code>## 
+## Call:
+## lm(formula = malaria$number ~ malaria$age)
+## 
+## Residuals:
+##     Min      1Q  Median      3Q     Max 
+## -458.60 -240.43   46.68  170.79  863.40 
+## 
+## Coefficients:
+##             Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept) -2342.24     511.05  -4.583 0.000786 ***
+## malaria$age   276.06      39.93   6.913 2.54e-05 ***
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Residual standard error: 368.7 on 11 degrees of freedom
+## Multiple R-squared:  0.8129, Adjusted R-squared:  0.7959 
+## F-statistic: 47.79 on 1 and 11 DF,  p-value: 2.544e-05</code></pre>
+<hr />
+<p>Y obtener una gráfica de la línea (función) de regresión.</p>
+<pre class="r"><code>plot(malaria$age, malaria$number,
+     xlab = &quot;Edad, años&quot;,
+     ylab = &quot;Cantidad de parásitos por ml de sangre&quot;)
+abline(rls)</code></pre>
+<p><img src="RegresionLinealSimplePoli_files/figure-html/linearegrls-1.png" width="672" /></p>
+<hr />
+</div>
+<div id="examinando-el-modelo" class="section level2">
+<h2>Examinando el modelo</h2>
+<div id="residuales" class="section level3">
+<h3>Residuales</h3>
+<pre class="r"><code>plot(malaria$age,residuals(rls),
+     xlab=&quot;Edad, años&quot;,
+     ylab=&quot;Residuales&quot;)</code></pre>
+<p><img src="RegresionLinealSimplePoli_files/figure-html/residuales-1.png" width="672" /></p>
+<hr />
+</div>
+<div id="intervalo-de-confianza" class="section level3">
+<h3>Intervalo de confianza</h3>
+<pre class="r"><code>library(ggplot2)
+ggplot(data=malaria, aes(x=age, y=number)) +
+  geom_point(pch=19, color=&quot;blue&quot;, size=2) +
+  geom_smooth(method=&quot;lm&quot;, color=&quot;red&quot;, linetype=2) +
+  labs(x=&quot;Edad, años&quot;, y=&quot;Cantidad parásitos&quot;)</code></pre>
+<pre><code>## `geom_smooth()` using formula &#39;y ~ x&#39;</code></pre>
+<p><img src="RegresionLinealSimplePoli_files/figure-html/intervconf-1.png" width="672" /></p>
+<hr />
+</div>
+</div>
+<div id="mejorando-el-modelo-rls" class="section level2">
+<h2>Mejorando el Modelo RLS</h2>
+<ul>
+<li><p>Vamos a tratar de mejorar el modelo anterior (curvatura y residuales) utilizando modelos polinomiales y transformaciones.</p></li>
+<li><p>Hay que tener en cuenta que al utilizar estos procedimientos, debemos justificarlo sobre la base de un comportamiento hipotético (fundamentado) en la relación causa-efecto (aunque no se conozca el mecanismo específico).</p></li>
+</ul>
+<hr />
+<div id="regresión-polinomial" class="section level3">
+<h3>Regresión Polinomial</h3>
+<p>Vamos a tratar un modelo cuadrático positivo (<span class="math inline">\(y = a*x^2 + b*x + c\)</span>). Utilizaremos el procedimiento <strong>lm</strong> (‘linear model’), pero especificando un modelo cuadrático:</p>
+<pre class="r"><code>rpol &lt;- lm(number ~ age + I(age^2), data=malaria)
+summary(rpol)</code></pre>
+<pre><code>## 
+## Call:
+## lm(formula = number ~ age + I(age^2), data = malaria)
+## 
+## Residuals:
+##     Min      1Q  Median      3Q     Max 
+## -548.69 -104.06  -16.76   40.90  773.31 
+## 
+## Coefficients:
+##             Estimate Std. Error t value Pr(&gt;|t|)  
+## (Intercept)  1937.97    2091.37   0.927   0.3759  
+## age          -483.20     364.09  -1.327   0.2140  
+## I(age^2)       31.99      15.27   2.095   0.0626 .
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Residual standard error: 322.3 on 10 degrees of freedom
+## Multiple R-squared:   0.87,  Adjusted R-squared:  0.8439 
+## F-statistic: 33.45 on 2 and 10 DF,  p-value: 3.719e-05</code></pre>
+<hr />
+<p>Los nuevos residuales:</p>
+<pre class="r"><code>plot(malaria$age,residuals(rpol),
+     xlab=&quot;Edad, años&quot;,
+     ylab=&quot;Residuales&quot;)</code></pre>
+<p><img src="RegresionLinealSimplePoli_files/figure-html/respoly-1.png" width="672" /></p>
+<hr />
+<p>Examinemos la nueva gráfica:</p>
+<pre class="r"><code>library(readxl)
+library(ggplot2)
+malaria &lt;- read_excel(&quot;data/mod_empiricos.xlsx&quot;, 
+    sheet = &quot;malaria&quot;)
+ggplot(malaria, aes(x = age, y = number)) +
+  geom_point(aes(x = age, y = number)) +
+  stat_smooth(aes(), method = &quot;lm&quot;, formula = y ~ poly(x,2), se =TRUE, size = 1) +
+  labs(x=&quot;Edad, años&quot;, y=&quot;Cantidad parásitos&quot;)</code></pre>
+<p><img src="RegresionLinealSimplePoli_files/figure-html/regpolgraf-1.png" width="672" /></p>
+<hr />
+<div id="exceso-de-ajuste-overfitting" class="section level4">
+<h4>Exceso de ajuste (‘overfitting’)</h4>
+<p>En el ejercicio anterior pudimos comprobar que mejoramos el modelo y su ajuste a los datos, utilizando una función polinomial. Si usamos una función cúbica puede mejorar el ajuste general, pero el <span class="math inline">\(R^2\)</span> ajustado (que depende del número de variables) no necesariamente mejorará, y estaremos sobre-ajustando los datos a un modelo. El problema principal del ‘overfitting’ es cuando no podemos explicar el significado de los términos incorporados al modelo. En este ejemplo, podemos hipotetizar que el componente cuadrático corresponde a un modelo de crecimiento del parásito en la sangre de los niños.</p>
+<hr />
+</div>
+</div>
+</div>
+<div id="transformaciones" class="section level2">
+<h2>Transformaciones</h2>
+<p>Otra manera de trabajar con los problemas de desviación de los puntos de una línea recta, falta de normalidad o falta de homocedasticidad, es usar transformaciones:</p>
+<p><a href="http://stattrek.com/regression/linear-transformation.aspx?tutorial=ap">Transformaciones</a></p>
+<hr />
+<div id="ejercicio" class="section level3">
+<h3>EJERCICIO</h3>
+<p>Abrir un nuevo documento RMarkdown:</p>
+<ul>
+<li><ol style="list-style-type: decimal">
+<li>Del archivo <strong>mod_empiricos.xlsx</strong>, importar los datos <em>trigliceridos</em> (circunferencia de la cintura, pulgadas y trigliceridos en sangre, mg/dl, en individuos adultos entre 21 y 79 años).</li>
+</ol></li>
+<li><ol start="2" style="list-style-type: decimal">
+<li>Formular un modelo de regresión lineal (debe establecer la posible relación causa efecto).</li>
+</ol></li>
+<li><ol start="3" style="list-style-type: decimal">
+<li>Realizar una gráfica de puntos con las dos variables.</li>
+</ol></li>
+<li><ol start="4" style="list-style-type: decimal">
+<li>Calcular los coeficientes del modelo de regresión y las estadísticas del mismo.</li>
+</ol></li>
+<li><ol start="5" style="list-style-type: decimal">
+<li>Graficar los residuales.</li>
+</ol></li>
+<li><ol start="6" style="list-style-type: decimal">
+<li>Graficar la línea de regresión, con el intervalo de confianza.</li>
+</ol></li>
+<li><ol start="7" style="list-style-type: decimal">
+<li>Repetir los pasos 4. - 6., utilizando un modelos polinomial.</li>
+</ol></li>
+<li><ol start="8" style="list-style-type: decimal">
+<li>Comparar y discutir los resultados.</li>
+</ol></li>
+<li><ol start="10" style="list-style-type: decimal">
+<li>Usar este ejercicio como parte de su primer informe.</li>
+</ol></li>
+</ul>
+<hr />
+</div>
+</div>
+</div>
+<div id="referencias" class="section level1">
+<h1>Referencias</h1>
+<p>Shiflet, A. 2014. Introduction to Computational Science, 2nd Edition. Princeton University Press, Princeton, New Jersey, USA.</p>
+<p>Suárez, E., Pérez, C.M., Rivera, R., Martínez, M.N. 2017. Applications of Regression Models in Epidemiology. John Wiley &amp; Sons, Inc., Hoboken, New Jersey, USA.</p>
+</div>
+
+
+
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.odd').parent('tbody').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open');
+  });
+});
+</script>
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

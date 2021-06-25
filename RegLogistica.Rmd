@@ -6,18 +6,13 @@ output:
   html_document:
     toc: yes
     toc_depth: 4
-  html_notebook: null
-  slidy_presentation:
-    incremental: yes
-  word_document:
-    toc: yes
 ---
 #Regresión Logística
 
 En una __regresión logística__ la variable respuesta (dependiente) es una _variable binaria_ (dicótoma en términos generales), y las variables predictoras (independientes) pueden ser binarias, categóricas o continuas.  
 
 [Logistic Regression vs Linear Regression](https://www.machinelearningplus.com/machine-learning/logistic-regression-tutorial-examples-r/)
-![](linear_vs_logistic_regression.jpg)
+![](media/linear_vs_logistic_regression.jpg)
 
 Como la variable respuesta solo puede tener valores entre 0 o 1, y las variables independientes pueden ser continuas, con cualquier valor real, para formular un modelo de regresión logística se hace una transformación de probabilidades a 'razones de probabilidades' (en inglés __odd ratios (ORs)__), o proporción de casos favorables a desfavorables.
 
@@ -46,7 +41,7 @@ Para este modelo utilizaremos la función __glm__ (general linear model):
 ```{r logistic}
 #leemos los datos:
 library(readxl)
-hbp <- read_excel("mod_empiricos.xlsx", 
+hbp <- read_excel("data/mod_empiricos.xlsx", 
                             sheet = "hbp")
 ```
 

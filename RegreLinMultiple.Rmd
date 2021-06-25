@@ -3,16 +3,9 @@ title: 'MeCoBi: Modelos de Regresión Lineal Múltiple'
 author: "D. S. Fernández del Viso"
 date: "Septiembre 2020"
 output:
-  slidy_presentation:
-    incremental: yes
-  html_notebook: null
   html_document:
     toc: yes
     toc_depth: 4
-  word_document:
-    toc: yes
-  ioslides_presentation:
-    incremental: yes
 ---  
 
 ```{r setup, include=FALSE}
@@ -35,7 +28,7 @@ Usaremos el los datos _bmi_ en el archivo _mod_empiricos.xlsx_.  Estos son datos
 ### DATOS  
 ```{r datos, warning=FALSE}
 library(readxl)
-reg.multiple <- read_excel("mod_empiricos.xlsx", 
+reg.multiple <- read_excel("data/mod_empiricos.xlsx", 
                             sheet = "bmi")
 head(reg.multiple)
 ```
