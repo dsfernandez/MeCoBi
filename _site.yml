@@ -7,7 +7,6 @@ navbar:
       href: home.html
     - text: "Modelos de Regresión"
       icon: fa-dove
-      menu:
     - text: "Series de Tiempo"
       menu:
     - text: "Modelos Dinámicos"
