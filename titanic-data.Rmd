@@ -1,0 +1,33 @@
+---
+title: "scratch pruebas"
+author: "D. S. Fernandez del Viso"
+date: "9/18/2019"
+output: html_document
+---
+
+```{r}
+library(readxl)
+hbp <- read_excel("mod_empiricos.xlsx", 
+                            sheet = "hbp")
+```
+
+Titanic
+```{r}
+library(titanic)
+titanic::titanic_gender_class_model
+titanic::titanic_gender_model
+data("titanic_train")
+View(titanic_train)
+data("titanic_test")
+View(titanic_test)
+data("titanic_gender_class_model")
+```
+## exporting R data
+```{r}
+library(readr)
+write_csv(titanic_train, "titanic.train.csv")
+write_csv(titanic_test, "titanic.test.csv")
+write_csv(titanic_gender_class_model, "titanic.test.survive.csv")
+
+```
+

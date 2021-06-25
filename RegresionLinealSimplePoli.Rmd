@@ -1,0 +1,271 @@
+---
+title: 'MeCoBi: Modelos de Regresion Lineal'
+author: "D. S. Fernandez del Viso"
+date: "Agosto 2020"
+output:
+  html_document:
+    toc: yes
+    toc_depth: 4
+  html_notebook: null
+  slidy_presentation:
+    incremental: yes
+  word_document:
+    toc: yes
+---
+
+#### Notas sobre R
+Deben tener previamente descargados los siguientes paquetes:
+```{r message=FALSE}
+library(readxl)
+library(knitr)
+library(dplyr)
+library(DT)
+library(EnvStats)
+```
+También deben descargar en su directorio ("folder") de trabajo, el archivo _mod_empiricos.xlsx_ que se encuentra en la carpeta del tema.
+
+# Modelos empíricos
+
+* _"An empirical model is based only on data and is used to predict, not explain, a system. An empirical model consists of a function that captures the trend of the data."_ (Shiflet, 2014)
+
+* Los datos utilizados en un modelo empírico provienen de experimentos u observaciones y mediciones de las variables de interés, en los sujetos bajo estudio y/o su ambiente.
+
+***
+
+# Modelos de Regresión
+
+* En un [modelo de regresión](https://drive.google.com/open?id=14DAqQ8KS8pceb3ynp1AbopW9ilekFoZw), además de la posible asociación entre variables o correlación, establecemos una relación de causalidad entre una variable respuesta y una (regresión simple) o más (regresión múltiple) variables independientes.
+
+* Estaremos utilizando la regresión como una función, para capturar la tendencia y el ajuste de los datos.  En un modelo de regresión, además de la estimación de los parámetros del modelo, podemos evaluar estadísticamente (mediante pruebas de hipótesis) el nivel de significancia de nuestro modelo, en comparación con un modelo de no relación entre las variables (o hipótesis nula). 
+
+# Regresión Lineal Simple
+<span style="color:red"> __Ejemplo 1__: </span>
+Infección con malaria: número de parásitos en 1 ml de sangre en niños de diversas edades.
+
+```{r datos.malaria}
+malaria <- read_excel("mod_empiricos.xlsx", 
+    sheet = "malaria")
+#creando una tabla elegante
+datatable(malaria,
+          filter = 'top', options = list(
+            pageLength = 15, autoWidth = TRUE
+          ))
+#si no funciona el anterior, algo más sencillo
+kable(malaria)
+```
+
+
+***
+
+##Modelo básico
+Supongamos que hay una variable cuantitativa $X$ que nos puede dar información de $Y$, entonces podemos explicar el valor esperado de $Y$ ($\mu_{Y|X}$), en su más simple expresión, utilizando la siguiente ecuación:
+
+$$\mu_{Y|X} = \beta_0 +\beta_1X\qquad(1)$$
+Y en su forma operativa, tenemos la siguiente ecuación para un modelo de regresión lineal simple:
+
+$$y_i = \beta_0 + \beta_1x_i + e_i\qquad(2)$$
+donde:
+
+> $y_i$ indica el valor específico de $Y$ para el _i-ésimo_ dato  
+> $\beta_0$ indica el valor esperado de $Y$ cuando $X = 0$ (__intercepto__ de la regresión)  
+> $\beta_1$ indica el parámetro asociado a la variable predictora $X$ (__pendiente__ de la regresión); representa el cambio en el valor esperado de $Y$ por unidad de cambio de $X$  
+> $x_i$ indica el valor específico de $X$ para el _i-ésimo_ dato  
+> $e_i$ indica el error aleatorio para el _i-ésimo_ dato  
+
+***
+
+###EJERCICIO 1: Representación gráfica de datos y definición de variables
+Volviendo a los datos de malaria en niños, nos preguntamos que relación existe entre la edad de los niños y el nivel de infección en la sangre, con el parásito.  
+
+* Primero debemos establecer cómo es la relación de causalidad.
+* Proponemos el siguiente modelo:  
+
+> número de parásitos en la sangre ($Y$) = número de parásitos al nacer $\beta_0$ + cambio en número de parásitos por unidad de edad ($\beta_1$) x edad ($X$)
+
+> no escribimos el error esperado, pero sabemos que está contenido en el modelo, como desviación (aleatoria e independiente) del verdadero valor de $Y$ dado el valor de $X$  
+
+***
+##Gráfica de los datos
+```{r grafica.malaria}
+plot(malaria$age, malaria$number, type = "p",
+     xlim = c(7,17),
+     xlab = "Edad (años)", 
+     ylab = "Número de parásitos en 1 ml de sangre", 
+     asp = NA)
+```
+
+***
+
+##Supuestos para la regresión lineal
+El procedimiento de regresión lineal asume que se cumplen algunos supuestos:
+
+ *  _Relación lineal_: la función (aunque no los datos, que pueden ser transformados) que define la relación entre las variables debe producir una línea recta.  
+ *  _Normalidad multivariada_: asume que los residuales están normalmente distribuidos.  
+ *  _No multicolinearidad_: cuando hay más de una variable independiente, que no estén altamente correlacionadas entre ellas.  
+ *  _No autocorrelación_: no debe observarse correlación entre los valores de una misma variable; se detecta en los residuales.  
+ *  _Homocedasticidad_: las varianzas de los residuales deben mantenerse similares.
+
+***
+
+### Pruebas de supuestos
+
+#### Prueba de normalidad: Q-Q plot y Shapiro-Wilk
+
+```{r normalidad}
+#Q-Q plot para las variables
+qqPlot(malaria$age, add.line = TRUE, points.col = "blue", line.col = "red")
+qqPlot(malaria$number, add.line = TRUE, points.col = "blue", line.col = "red")
+#prueba de Shapiro-Wilk
+shapiro.test(malaria$age)
+shapiro.test(malaria$number)
+```
+
+***
+
+#### Prueba de homocedasticidad    
+Para probar si la varianza de los residuales es constante, es decir que poseen _homocedasticidad_, utilizamos la prueba [Goldfeld-Quandt](https://www.statisticshowto.datasciencecentral.com/goldfeld-quandt-test/), con una $H_0:igualdad\:de\:varianza$, entre dos grupos de valores de residuales.
+```{r homocedasticidad}
+#Goldfeld-Quandt test
+#Ho: varianzas iguales entre grupos de datos (baja y alta edad)
+library(lmtest)
+gqtest(lm(formula = number ~ age, data = malaria))
+```
+
+
+
+***
+
+## Estimación de los parámetros del modelo
+
+Usaremos el método de los [cuadrados-mínimos](https://drive.google.com/open?id=1pDIstb6t3mjBge0c2hT_UcX_p0BPBvOt) ('least-squares') para estimar los parámetros del modelo.  Este método se basa en encontrar los parámetros $\beta_0$ y $\beta_1$ que minimicen la siguiente función:
+
+$$S(\beta_0, \beta_1) = \sum {e_i}^2 = \sum (y_i - \beta_0 - \beta_1x_i)^2$$
+
+***
+
+## Estimados de los parámetros de la regresión lineal simple
+Usando el procedimiento __lm__ en R podemos estimar los parámetros del modelo.
+```{r regrlinsimp}
+rls <- lm(malaria$number ~ malaria$age)
+summary(rls)
+```
+
+***
+
+Y obtener una gráfica de la línea (función) de regresión.
+```{r linearegrls}
+plot(malaria$age, malaria$number,
+     xlab = "Edad, años",
+     ylab = "Cantidad de parásitos por ml de sangre")
+abline(rls)
+```
+
+***
+
+## Examinando el modelo
+### Residuales
+```{r residuales}
+plot(malaria$age,residuals(rls),
+     xlab="Edad, años",
+     ylab="Residuales")
+```
+
+***
+
+### Intervalo de confianza
+```{r intervconf}
+library(ggplot2)
+ggplot(data=malaria, aes(x=age, y=number)) +
+  geom_point(pch=19, color="blue", size=2) +
+  geom_smooth(method="lm", color="red", linetype=2) +
+  labs(x="Edad, años", y="Cantidad parásitos")
+```
+
+
+***
+
+## Mejorando el Modelo RLS
+
+* Vamos a tratar de mejorar el modelo anterior (curvatura y residuales) utilizando modelos polinomiales y transformaciones.  
+
+* Hay que tener en cuenta que al utilizar estos procedimientos, debemos  justificarlo sobre la base de un comportamiento hipotético (fundamentado) en la relación causa-efecto (aunque no se conozca el mecanismo específico).
+
+
+***
+
+### Regresión Polinomial
+Vamos a tratar un modelo cuadrático positivo ($y = a*x^2 + b*x + c$). Utilizaremos el procedimiento __lm__ ('linear model'), pero especificando un modelo cuadrático:
+```{r regpolinomial}
+rpol <- lm(number ~ age + I(age^2), data=malaria)
+summary(rpol)
+```
+
+***
+
+Los nuevos residuales:
+```{r respoly}
+plot(malaria$age,residuals(rpol),
+     xlab="Edad, años",
+     ylab="Residuales")
+```
+
+***
+
+Examinemos la nueva gráfica:
+```{r regpolgraf}
+library(readxl)
+library(ggplot2)
+malaria <- read_excel("mod_empiricos.xlsx", 
+    sheet = "malaria")
+ggplot(malaria, aes(x = age, y = number)) +
+  geom_point(aes(x = age, y = number)) +
+  stat_smooth(aes(), method = "lm", formula = y ~ poly(x,2), se =TRUE, size = 1) +
+  labs(x="Edad, años", y="Cantidad parásitos")
+```
+
+***
+
+#### Exceso de ajuste ('overfitting')
+En el ejercicio anterior pudimos comprobar que mejoramos el modelo y su ajuste a los datos, utilizando una función polinomial.  Si usamos una función cúbica puede mejorar el ajuste general, pero el $R^2$ ajustado (que depende del número de variables) no necesariamente mejorará, y estaremos sobre-ajustando los datos a un modelo.  El problema principal del 'overfitting' es cuando no podemos explicar el significado de los términos incorporados al modelo.  En este ejemplo, podemos hipotetizar que el componente cuadrático corresponde a un modelo de crecimiento del parásito en la sangre de los niños.
+
+***
+## Transformaciones
+Otra manera de trabajar con los problemas de desviación de los puntos de una línea recta, falta de normalidad o falta de homocedasticidad, es usar transformaciones:
+
+[Transformaciones](http://stattrek.com/regression/linear-transformation.aspx?tutorial=ap)
+
+***
+
+### EJERCICIO
+
+Abrir un nuevo documento RMarkdown:
+
+* 1. Del archivo __mod_empiricos.xlsx__, importar los datos _trigliceridos_ (circunferencia de la cintura, pulgadas y trigliceridos en sangre, mg/dl, en individuos adultos entre 21 y 79 años).
+
+* 2. Formular un modelo de regresión lineal (debe establecer la posible relación causa efecto).
+
+* 3. Realizar una gráfica de puntos con las dos variables.
+
+* 4. Calcular los coeficientes del modelo de regresión y las estadísticas del mismo.
+
+* 5. Graficar los residuales.
+
+* 6. Graficar la línea de regresión, con el intervalo de confianza.
+
+* 7. Repetir los pasos 4. - 6., utilizando un modelos polinomial.
+
+* 8. Comparar y discutir los resultados.
+
+* 10. Usar este ejercicio como parte de su primer informe.
+
+
+
+
+
+***
+
+# Referencias
+
+Shiflet, A. 2014. Introduction to Computational Science, 2nd Edition. Princeton University Press, Princeton, New Jersey, USA.
+
+Suárez, E., Pérez, C.M., Rivera, R., Martínez, M.N. 2017. Applications of Regression Models in Epidemiology. John Wiley & Sons, Inc., Hoboken, New Jersey, USA.

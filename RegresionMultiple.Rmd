@@ -1,0 +1,207 @@
+---
+title: 'MeCoBi: Modelos de Regresion Lineal Múltiple'
+author: "D. S. Fernandez del Viso"
+date: "Septiembre 2019"
+output:
+  html_document:
+    toc: yes
+    toc_depth: 4
+  html_notebook: null
+  slidy_presentation:
+    incremental: yes
+  word_document:
+    toc: yes
+---
+#Regresión Múltiple
+Cuando tenemos más de una variable predictora ("independiente""), la regresión lineal simple viene a ser una __regresión múltiple__. La regresión polinomial es un caso especial de regresión múltiple, en el cual una misma variable predictora se expresa en forma polinomial ($X\ y\  X^2,\ por\ ejemplo$).
+
+En esta sección estaremos considerando el caso de variables predictoras diferentes, y combinaciones de las mismas.
+
+Usaremos el los datos _bmi_ en el archivo _mod_empiricos.xlsx_.  Estos son datos de individuos adultos entre 21 y 79 años, con las siguientes variables: _BMI_, índice de masa corporal ($kg/m^{2}$); _Age_, edad (_años_); _Cholesterol_, niveles de colesterol en sangre, ($mg/dL$); _Glucose_, niveles de glucosa en la sangre, ($mg/dL$).
+
+```{r datos}
+library(readxl)
+reg.multiple <- read_excel("mod_empiricos.xlsx", 
+                            sheet = "bmi")
+head(reg.multiple)
+```
+
+***
+
+##Matriz de relación entre variables
+Un primer paso en el análisis de regresión múltiple, es examinar la relación entre dos variables a la vez.  calcularemos los coeficientes de regresión y construiremos una matriz de gráficos de regresión.
+
+```{r matriz de regresion, message=FALSE, warning=FALSE}
+library(car)
+#matriz de correlación
+cor(reg.multiple)
+#gráfica de regresiones en parejas, con línea de regresión
+scatterplotMatrix(reg.multiple, ~ BMI + Age + Cholesterol + Glucose,
+                  smooth = list(lty = 2), id = TRUE,
+                  regLine = list(lty = 1, col = "red"),
+                  col = "blue")
+```
+
+***
+###Interpretación de la gráfica  
+
+* podemos observar la distribución de los valores de cada variable: curva de densidad, y 'alfombra' de distribución.  
+
+* muestra los gráficos de puntos por pareja de variable (las unidades de los ejes se encuentran a los extremos de filas y columnas).
+
+* la línea de la regresión lineal simple aparece en rojo.
+
+* las líneas punteadas muestran una franja de ajuste no-paramétrico de los datos.
+
+* los puntos identificados son los que más se alejan del centro de los datos (distancia de Mahalonobis).
+
+***
+
+##Modelo de regresión múltiple
+Ahora debemos seleccionar la variable dependiente, y establecer un modelo de regresión múltiple, para evaluarlo estadísticamente.  Usaremos como variable dependiente al índice de masa corporal (_BMI_) y el procedimiento __lm()__ de R.
+```{r regresion.multiple}
+modRM <- lm(BMI ~ Age + Cholesterol + Glucose, 
+              data = reg.multiple)
+summary(modRM)
+ncvTest(modRM)
+spreadLevelPlot(modRM)
+```
+
+***
+
+###Análisis de los resultados
+
+* los residuales muestran una distribución algo sesgada hacia valores negativos.  
+
+* los estimados de los coeficientes resultaron positivos.
+
+* el valor del intercepto es significativamente diferente de 0 (poco probable que la línea corte el origen).
+
+* solamente el estimado del coeficiente para la variable _Cholesterol_ es marginalmente significativo, o sea diferente de 0 (Pr = 0.05791).
+
+* el __coeficiente de determinación ($R^{2}$)__ nos indica la proporción de la variación en la variable dependiente que es explicada por las variables independientes, y encontranmos que es de 0.127 (12.7 %) solamente.  
+
+* el __estadístico F__ (que prueba si en conjunto el modelo tiene una respuesta diferente de 0, debida a los coeficientes) resultó no-significativo, si consideramos el usual nivel de P = 0.05.
+
+* la prueba de __homocedasticidad__ (varianza igual de los errores de las predicciones) indica que si se cumple este supuesto, y se corrobora en la gráfica con una línea horizontal ajustada a los residuales.
+
+***
+
+##Modelo con interacciones entre las variables predictoras
+A partir de los resultados anteriores, vamos a considerar un modelo en el cual incorporemos las posibles interacciones entre variables.  Una manera de hacerlo es creando variables en las que dos (o más) variables producen una variable de interacción, es decir que su efecto combinado es mayor que estando separadas.
+```{r interacciones}
+modRI <- lm(BMI ~ Age + Cholesterol + Glucose + Cholesterol*Glucose, 
+              data = reg.multiple)
+summary(modRI)
+ncvTest(modRI)
+spreadLevelPlot(modRI)
+```
+
+***
+
+###Análisis de los resultados
+
+* con este nuevo modelo con interacción, ninguno de los coeficientes resultó significativamente diferente de 0.
+
+* el $R^{2}$ y el ajustado, aumentaron ligeramente, pero esto es usual al aumentar el número de variables, lo cual empieza realmente a sobre-ajustar la variación aleatoria al modelo.
+
+* la prueba de igualdad de varianza de los errores de las predicciones, aunque indica que se cumple el supuesto, la gráfica muestra alguna desviación de la horizontal. 
+
+* la selección de un modelo y sus variables es un proceso sin una regla fija.
+
+***
+
+## Otro modelo con menos variables y con interacción
+```{r interaccion2}
+library(car)
+modRI <- lm(BMI ~ Cholesterol + Age*Glucose, data = reg.multiple)
+summary(modRI)
+ncvTest(modRI)
+spreadLevelPlot(modRI)
+```
+## Modelo con las dos variables más correlacionadas inicialmente
+```{r dosvariables}
+modRI <- lm(BMI ~ Cholesterol + Glucose, data = reg.multiple)
+summary(modRI)
+ncvTest(modRI)
+spreadLevelPlot(modRI)
+```
+
+
+##Comparando modelos   
+
+Una manera de comparar visualmente modelos (en realidad sus coeficientes) es usar el paquete __coefplot__, en conjunto con __ggplot2__, para crear una gráfica de los coeficientes estimados de cada variable (sola o de interacción), en cada modelo y detectar los que son diferentes de 0, y los modelos que los contienen.
+
+```{r coefplot, message=FALSE}
+library(ggplot2)
+library(coefplot)
+#cálculo para todos los modelos
+modbmi1 <- lm(BMI ~ Age + Cholesterol + Glucose, data=reg.multiple)
+modbmi2 <- lm(BMI ~ Age + Glucose + Cholesterol + Glucose*Cholesterol, data=reg.multiple)
+modbmi3 <- lm(BMI ~ Cholesterol + Age*Glucose, data=reg.multiple)
+modbmi4 <- lm(BMI ~ Cholesterol + Glucose, data=reg.multiple)
+#comparando coeficientes de todos los modelos
+multiplot(modbmi1, modbmi2, modbmi3, modbmi4, pointSize = 2, intercept=FALSE)
+```
+
+***
+
+##Selección de modelos por pasos
+
+Existen métodos para seleccionar automáticamente el mejor modelo, a base de estadísticos indicadores, y que conlleva un procedimiento iterativo.  Uno de estos procedimientos es conocido como 'stepwise' (por pasos), y aunque no es el más aceptado en la actualidad, ha sido muy usado y es una buena manera de ilustrar el procedimiento, usando nuestros datos.
+
+```{r stepwise}
+#formulación de un modelo nulo y un modelo completo
+modNulo <- lm(BMI ~ 1, data = reg.multiple)
+modFull <- lm(BMI ~ Age + Cholesterol + Glucose + Age*Cholesterol + Age*Glucose + Cholesterol*Glucose, 
+              data = reg.multiple)
+#procedimiento stepwise
+bmistep <- step(modNulo,
+                scope = list(lower=modNulo, upper=modFull,
+                             direction="both"))
+
+bmistep
+```
+
+***
+
+###Interpretación y selección del modelo
+
+* el proceso de selección se basa en mantener el modelo con el menor valor del estadístico __AIC__ (Akaike Information Criterion), que indica el modelo con la menor pérdida de información y mayor simplicidad.
+
+* en el proceso se parte de un modelo nulo (no efecto de predictores) y hasta un modelo muy complejo, incluyendo interacciones.
+
+* las variables se incluyen y quitan y cada vez se recalcula AIC, hasta obtener el modelo que mantiene el mínimo valor de AIC.
+
+```{r bestmodel}
+modST <- lm(formula = BMI ~ Cholesterol + Glucose, data = reg.multiple)
+summary(modST)
+```
+
+***
+
+##Selección usando R-cuadrado ajustado y Mallow's Cp para mejores modelos
+
+Otro método visual de selección, basado en el $R^{2}-ajustado$ y en Cp (Mallow's Cp):
+```{r cp}
+library(leaps)
+modCp <- regsubsets(BMI ~ Age + Cholesterol + Glucose + Cholesterol*Glucose, data = reg.multiple, nbest = 2)
+plot(modCp, scale="adjr2")
+plot(modCp, scale="Cp")
+```
+
+###Interpretación  
+
+El mejor modelo con R-cuadrado ajustado está en la parte superior, y contiene Cholesterol, Glucose y su interacción.
+
+Para el caso del estadístico Cp, al igual que con el AIC, el valor más bajo representa el mejor modelo, en este caso uno de Intercept, Cholesterol y Glucose.  En general el valor de Cp se acerca al modelo con un número similar de parámetros (incluyendo el intercepto), en nuestro caso tres.
+
+***
+
+##Referencias bibliográficas
+
+Kabacoff, R. I.  2015.  R in Action.  Data analysis and graphics with R.  Manning Publications Co., Shelter Island, NY, USA.
+
+Lander, J. P.  2014.  R for everyone.  Pearson Education, Inc.  Crawfordsville, Indiana, USA.
+
+Suárez, E., Pérez, C.M., Rivera, R., Martínez, M.N. 2017. Applications of Regression Models in Epidemiology. John Wiley & Sons, Inc., Hoboken, New Jersey, USA.

@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+<meta name="author" content="D. S. Fernandez del Viso (basado en Bjørnstad, 2018)" />
+
+
+<title>Modelos Mecanicistas - ODE - SIR</title>
+
+<script src="site_libs/header-attrs-2.9/header-attrs.js"></script>
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<style>h1 {font-size: 34px;}
+       h1.title {font-size: 38px;}
+       h2 {font-size: 30px;}
+       h3 {font-size: 24px;}
+       h4 {font-size: 18px;}
+       h5 {font-size: 16px;}
+       h6 {font-size: 12px;}
+       code {color: inherit; background-color: rgba(0, 0, 0, 0.04);}
+       pre:not([class]) { background-color: white }</style>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<link href="site_libs/font-awesome-5.1.0/css/all.css" rel="stylesheet" />
+<link href="site_libs/font-awesome-5.1.0/css/v4-shims.css" rel="stylesheet" />
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+<style type="text/css">code{white-space: pre;}</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+pre code {
+  padding: 0;
+}
+</style>
+
+
+<style type="text/css">
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #adb5bd;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script type="text/javascript">
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.tab('show');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+
+  // Navbar adjustments
+  var navHeight = $(".navbar").first().height() + 15;
+  var style = document.createElement('style');
+  var pt = "padding-top: " + navHeight + "px; ";
+  var mt = "margin-top: -" + navHeight + "px; ";
+  var css = "";
+  // offset scroll position for anchor links (for fixed navbar)
+  for (var i = 1; i <= 6; i++) {
+    css += ".section h" + i + "{ " + pt + mt + "}\n";
+  }
+  style.innerHTML = "body {" + pt + "padding-bottom: 40px; }\n" + css;
+  document.head.appendChild(style);
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "&#xe258;";
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">MeCoBi</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="home.html">
+    <span class="fa fa-home"></span>
+     
+    Hola
+  </a>
+</li>
+<li class="dropdown-header">Modelos de Regresión</li>
+<li class="dropdown-header">Series de Tiempo</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    Modelos Dinámicos
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="ModelMecODE-SIR-I.html">SIR-I</a>
+    </li>
+  </ul>
+</li>
+<li class="dropdown-header">Modelos Espaciales</li>
+<li class="dropdown-header">Modelos Basados en Agentes</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div id="header">
+
+
+
+<h1 class="title toc-ignore">Modelos Mecanicistas - ODE - SIR</h1>
+<h4 class="author">D. S. Fernandez del Viso (basado en Bjørnstad, 2018)</h4>
+<h4 class="date">10/7/2020</h4>
+
+</div>
+
+
+<div id="modelos-epidemiológicos-mecanicistas" class="section level1">
+<h1>Modelos Epidemiológicos Mecanicistas</h1>
+<p>En esta parte del curso vamos a trabajar con modelos construidos a partir del conocimiento de las relaciones entre los elementos que componen un sistema biológico-epidemiológico. El modelo básico que vamos a estudiar se conoce como <strong>SIR</strong> y se construye mediante la formulación de <strong>ecuaciones diferenciales (ODE)</strong> que se resuelven utilizando procedimientos de <strong>integración numérica</strong>, ya que se trata de sistemas de <strong>ecuaciones diferenciales no-lineales</strong>, y no poseen soluciones analíticas sencillas.</p>
+<div id="el-modelo-sir" class="section level2">
+<h2>El Modelo SIR</h2>
+<p>Kermack and McKendrick (1927) formularon una serie de ecuaciones para entender el funcionamiento de un sistema epidemiológico, para una infección que se extiende y luego disminuye. En resumen, su planteamiento se puede expresar en un modelo básico a base de un sistema de ecuaciones diferenciales:</p>
+<div class="figure">
+<img src="./images/SIR-epidemics.png" alt="" />
+<p class="caption">tomado de Bjørnstad (2018)</p>
+</div>
+<p><span class="math display">\[\frac{dS}{dt} = \mu(N - S) - \beta I\frac{S}{N}\qquad(1)\]</span><br />
+<span class="math display">\[\frac{dI}{dt} = \beta I\frac{S}{N} - (\mu + \gamma)I\qquad(2)\]</span><br />
+<span class="math display">\[\frac{dR}{dt} = \gamma I - \mu R\qquad(3)\]</span><br />
+En las ecuaciones (1) y (2) podemos reemplazar el valor de <em>N</em> con 1, cuando <em>S, I, y R</em> se expresan como fracción de la población total <em>N</em>.</p>
+<div id="algunos-supuestos-del-sistema-de-ecuaciones-anterior" class="section level3">
+<h3>Algunos supuestos del sistema de ecuaciones anterior:</h3>
+<ul>
+<li><span class="math inline">\(N\)</span> es el <strong>tamaño poblacional</strong>, con una tasa <em>per capita</em> de mortalidad, <span class="math inline">\(\mu\)</span>, en equilibrio con una tasa de natalidad <span class="math inline">\(\mu N\)</span>.<br />
+</li>
+<li>La <strong>población no cambia en el tiempo</strong>, <span class="math inline">\(dN/dt = 0\)</span> y por lo tanto <span class="math inline">\(N = S + I + R\)</span> es constante.<br />
+</li>
+<li>La <strong>mortalidad</strong> inducida por la infección es 0.<br />
+</li>
+<li><strong>No hay inmunidad perinatal</strong>, los nacimientos pasan a la clase <span class="math inline">\(S\)</span> directamente.<br />
+</li>
+<li>La <strong>transmisión</strong> de infectados a susceptibles está “controloda” por el término <span class="math inline">\(\beta I\frac{S}{N}\)</span>. Esto implica:
+<ul>
+<li>los individuos infecciosos, <span class="math inline">\(I\)</span>, se <strong>mezclan al azar</strong> con los otros individuos (<span class="math inline">\(S/N\)</span>);<br />
+</li>
+<li><span class="math inline">\(\beta\)</span> es la <strong>tasa de contactos</strong> multiplicada por la probabilidad de transmisión al entrar en contacto <span class="math inline">\(I\)</span> con <span class="math inline">\(S\)</span>.<br />
+</li>
+</ul></li>
+<li>La probabilidad de <strong>recuperarse o morir</strong> no cambian durante la infección.<br />
+</li>
+<li>La <strong>infectividad</strong> no cambia durante la infección.<br />
+</li>
+<li>los <strong>individuos infectados</strong> se mueven directamente a la clase <span class="math inline">\(I\)</span>.<br />
+</li>
+<li>los individuos infectados permanecen así por un <strong>periodo infeccioso</strong> promedio <span class="math inline">\(1/\gamma\)</span> (se asume que <span class="math inline">\(\mu\)</span> &lt;&lt; <span class="math inline">\(\gamma\)</span>).<br />
+</li>
+<li>el modelo asume que los individuos <strong>recuperados son inmunes</strong> por el resto de sus vidas.</li>
+</ul>
+</div>
+</div>
+<div id="integración-numérica-del-modelo-sir" class="section level2">
+<h2>Integración Numérica del Modelo SIR</h2>
+<p>Para resolver el sistema de ecuaciones diferenciales e integrar los cambios en función del tiempo, usaremos el paquete <strong>deSolve</strong> de R. Vamos a usar un modelo aún más simple, haciendo que <span class="math inline">\(\mu\)</span> sea 0 <strong>(epidemia cerrada)</strong>.</p>
+<p>En primer lugar hay que definir una función en R en la cual están incluidos: tiempo (cuando hay estacionalidad), vector de la variables de estado (<span class="math inline">\(S, I, R\)</span>), los parámetros del modelo (<span class="math inline">\(\beta, \mu, \gamma, N\)</span>).</p>
+<pre class="r"><code>library(deSolve)
+sirmod=function(t, y, parms){
+   #Pull state variables from y vector
+   S=y[1]
+   I=y[2]
+   R=y[3]
+   #Pull parameter values from parms vector
+   beta=parms[&quot;beta&quot;]
+   mu=parms[&quot;mu&quot;]
+   gamma=parms[&quot;gamma&quot;]
+   N=parms[&quot;N&quot;]
+   #Define equations
+   dS = mu * (N  - S)  - beta * S * I / N
+   dI = beta * S * I / N - (mu + gamma) * I
+   dR = gamma * I - mu * R
+   res=c(dS, dI, dR)
+   #Return list of gradients
+   list(res)
+ }</code></pre>
+<p>Definimos los parámetros, los valores iniciales de las variables de estado y la escala de tiempo y resolución. La escala de tiempo es de 26 semanas (6 meses) con resolución de 1/10 de semana (10 incrementos por semana). Como vamos a modelar usando la fracción de individuos en cada clase <span class="math inline">\(N\)</span> = 1, no hay nacimientos ni muertes, <span class="math inline">\(\mu\)</span> = 0, un período infeccioso de 2 semanas (<span class="math inline">\(\gamma\)</span> = 1/2), y una tasa de transmisión de 2 (<span class="math inline">\(\beta\)</span> = 2). Asumimos una fracción de infectados iniciales de 0.1% de la población inicial, y el resto susceptible.</p>
+<pre class="r"><code> times  = seq(0, 26, by=1/10)
+ parms  = c(mu = 0.0, N = 1, beta =  2, gamma = 1/2)
+ start = c(S=0.999, I=0.001, R = 0)</code></pre>
+<p>A continuación se aplica la función <strong>ode</strong>, y los resultados se convierten a un <strong>data.frame</strong> para usarlos con más facilidad.</p>
+<pre class="r"><code>out = ode(y = start, times = times, func = sirmod, 
+     parms = parms)
+out=as.data.frame(out)
+head(round(out, 3))</code></pre>
+<pre><code>##   time     S     I R
+## 1  0.0 0.999 0.001 0
+## 2  0.1 0.999 0.001 0
+## 3  0.2 0.999 0.001 0
+## 4  0.3 0.998 0.002 0
+## 5  0.4 0.998 0.002 0
+## 6  0.5 0.998 0.002 0</code></pre>
+<p>Ahora vamos a construir una gráfica para observar la dinámica del modelo SIR básico.</p>
+<pre class="r"><code> plot(x = out$time, y = out$S, ylab = &quot;Fracción de N&quot;, 
+      xlab = &quot;Semanas&quot;, type = &quot;l&quot;, lwd = 3, col = &quot;blue&quot;)
+ lines(x = out$time, y = out$I, lwd = 3, col = &quot;red&quot;)
+ lines(x = out$time, y = out$R, lwd = 3, col = &quot;green&quot;)
+ legend(15, 0.7, legend = c(&quot;S&quot;, &quot;I&quot;, &quot;R&quot;), col = c(&quot;blue&quot;, &quot;red&quot;, &quot;green&quot;), lty = 1)</code></pre>
+<p><img src="ModelMecODE-SIR-II_files/figure-html/plotsir-1.png" width="672" /></p>
+<div id="ejercicio" class="section level3">
+<h3>Ejercicio</h3>
+<p>Examinar los resultados al cambiar los parámetros y valores iniciales y relacionarlos a escenarios epidemiológicos hipotéticos.</p>
+<ul>
+<li>¿Cuál es el efecto de disminuir la cantidad inicial de susceptibles, S, y con cuáles escenarios epidemiológicos podemos relacionarlos?<br />
+</li>
+<li>Igual con <span class="math inline">\(\beta\)</span> y <span class="math inline">\(\gamma\)</span>.</li>
+</ul>
+</div>
+</div>
+<div id="r_0-razón-reproductiva-básica" class="section level2">
+<h2><span class="math inline">\(R_0\)</span>, razón reproductiva básica</h2>
+<p>Para patógenos que se transmiten directamente, <strong><span class="math inline">\(R_0\)</span></strong> es, por definición, el número esperado de casos secundarios que surgen de un caso específico en una población completamente susceptible. Es una de los valores más importantes en los estudios epidemiológicos, y manejo de enfermedades infecciosas. Algunas de las inferencias que se obtienen del cálculo de <span class="math inline">\(R_0\)</span>:</p>
+<ul>
+<li>El <strong>umbral</strong> para el establecimiento de una infección. Cuando <span class="math inline">\(R_0\)</span> es mayor que 1, un patógeno puede invadir una población; si es menor que 1, se rompe la cadena de infección y esta no procede. En estudios de poblaciones naturales se define una <strong>densidad crítica del hospedero</strong>.<br />
+</li>
+<li>Define el umbral para lograr <strong>inmunidad de manada</strong> mediante vacunación. Si hay un número suficiente de inmunizados (no susceptibles) lo que se conoce como <strong><span class="math inline">\(R_0\)</span> efectivo</strong>, (<span class="math inline">\(R_E = sR_0\)</span>, donde <em>s</em> es la proporción de susceptibles en un momento dado), disminuye por debajo de 1. Este umbral es: 1- 1/<span class="math inline">\(R_0\)</span>.</li>
+</ul>
+</div>
+<div id="valor-teórico-de-r_0" class="section level2">
+<h2>Valor teórico de <span class="math inline">\(R_0\)</span></h2>
+<p>A partir de la ecuación (2), y asumiendo <span class="math inline">\(\mu\)</span> = 0: <span class="math display">\[\frac{dI}{dt} = \beta IS - \gamma I\]</span><br />
+obtenemos:<br />
+<span class="math display">\[\frac{dI}{dt} = I(\beta S - \gamma)\]</span><br />
+Una solución para el caso en que no ocurra epidemia (<span class="math inline">\(dI/dt = 0\)</span>) es que:<br />
+<span class="math display">\[\beta S - \gamma = 0\]</span><br />
+y de aquí podemos obtener la fracción de susceptibles necesaria para que ocurra la epidemia (umbral):<br />
+<span class="math display">\[S_u = \frac{\gamma}{\beta}\]</span> A esta razón <span class="math inline">\(\gamma / \beta\)</span> se la conoce como <strong>tasa de remoción relativa</strong>, y tiene que ser</p>
+<p>suficientemente baja para permitir que la enfermedad progrese. Sin embargo, el valor que más se utiliza en epidemiología es el inverso, y es al que se conoce como:<br />
+<span class="math display">\[R_0 = \frac{\beta}{\gamma}\]</span></p>
+<p>Sabiendo que el R efectivo es <span class="math inline">\(R_E = R_0*s\)</span>, podemos encontrar el valor umbral teórico de R para que proceda la infección, reemplazando <span class="math inline">\(R_0\)</span> por <span class="math inline">\(\beta / \gamma\)</span> y <em>s</em> por <span class="math inline">\(S_u\)</span>:<br />
+<span class="math display">\[R_E = R_0 * S_u = \frac{\beta}{\gamma} * \frac{\gamma}{\beta} = 1\]</span></p>
+</div>
+<div id="análisis-de-r_0" class="section level2">
+<h2>Análisis de <span class="math inline">\(R_0\)</span></h2>
+<p>En la siguiente gráfica podemos observar las variaciones de <span class="math inline">\(R_E\)</span> y el punto en el cual la infección decae al alcanzarse el umbral <span class="math inline">\(S_0\)</span>.</p>
+<pre class="r"><code>#Calculate R0
+R0 = parms[&quot;beta&quot;]/(parms[&quot;gamma&quot;]+parms[&quot;mu&quot;])
+
+#Adjust margins to accommodate a second right axis
+par(mar = c(5,5,2,5))
+#Plot state variables
+plot(x = out$time, y = out$S, ylab = &quot;Fraction&quot;,
+     xlab = &quot;Time&quot;,  type = &quot;l&quot;, col = &quot;blue&quot;, xlim = c(0, 13))
+lines(x = out$time, y = out$I, col = &quot;red&quot;)
+lines(x = out$time, y = out$R, col = &quot;green&quot;)
+
+#Add vertical line at turnover point
+xx = out$time[which.max(out$I)]
+lines(c(xx,xx), c(1/R0,max(out$I)), lty = 3)
+ss = out$S[which.max(out$I)]
+lines(c(0,xx), c(ss,ss), lty = 3)
+
+#prepare to superimpose 2nd plot
+par(new = TRUE)
+#plot effective reproductive ratio (w/o axes)
+plot(x = out$time, y = R0*out$S, type = &quot;l&quot;, lty = 2,
+     lwd = 2, col = &quot;black&quot;, axes = FALSE, xlab = NA, 
+     ylab = NA, ylim = c(0, 4), xlim = c(0, 13))
+lines(c(xx, 26), c(1,1), lty = 3)
+#Add right-hand axis for RE
+axis(side = 4)
+mtext(side = 4, line = 4, expression(R[E]))
+#Add legend
+legend(&quot;right&quot;, legend = c(&quot;S&quot;, &quot;I&quot;, &quot;R&quot;, 
+     expression(R[E])), lty = c(1,1,1, 2),  
+     col = c(&quot;black&quot;, &quot;red&quot;, &quot;green&quot;, &quot;black&quot;))</code></pre>
+<p><img src="ModelMecODE-SIR-II_files/figure-html/re-1.png" width="672" /></p>
+</div>
+<div id="tamaño-final-de-la-epidemia" class="section level2">
+<h2>Tamaño Final de la Epidemia</h2>
+<p>Al final de la epidemia, cuando <span class="math inline">\(I=0\)</span>, El valor de R (<span class="math inline">\(R^*\)</span>) es el <strong>tamaño final de la epidemia</strong>, <span class="math inline">\(f\)</span>, y está dado por: <span class="math inline">\(f \approx exp(-R_0)\)</span>. Se puede obtener un valor más exacto de manera computacional:</p>
+<pre class="r"><code># usando el paquete rootSolve
+require(rootSolve)
+parms  = c(mu = 0.0, N = 1, beta =  3.5, gamma = 1/2)
+equil=runsteady(y=c(S=1-1E-5, I=1E-5, R=0), 
+times=c(0,1E5), func=sirmod, parms=parms)
+round(equil$y, 3)</code></pre>
+<pre><code>##     S     I     R 
+## 0.001 0.000 0.999</code></pre>
+<pre class="r"><code># gráfica de tfe vs R0
+#Candidate values for R0 and beta
+R0 = seq(0.1, 10, length=100)
+betas= R0 * 1/2
+#Vector of NAs to be filled with numbers
+f = rep(NA, 50)
+#Loop over i from 1, 2, ..., 50
+for(i in seq(from=1, to=100, by=1)){
+     equil=runsteady(y=c(S=1-1E-5, I=1E-5, 
+       R=0), times=c(0,1E5), func=sirmod, 
+       parms=c(mu=0, N=1, beta=betas[i], gamma=1/2))
+     f[i]=equil$y[&quot;R&quot;]
+}
+plot(R0, f, type=&quot;l&quot;, xlab=expression(R[0]))
+curve(1-exp(-x), from=1, to=10, add=TRUE, col=&quot;red&quot;)</code></pre>
+<p><img src="ModelMecODE-SIR-II_files/figure-html/fes-1.png" width="672" /></p>
+</div>
+<div id="epidemia-abierta" class="section level2">
+<h2>Epidemia abierta</h2>
+<p>Vamos a considerar el caso en el que hay reclutamiento de nuevos susceptibles (<span class="math inline">\(\mu &gt; 0\)</span>). En este caso se puede estudiar la dinámica de la epidemia en varias ocurrencias.</p>
+<pre class="r"><code>times  = seq(0, 52*50, by=.1)
+parms  = c(mu = 1/(50*52), N = 1, beta =  2, 
+      gamma = 1/2)
+start = c(S=0.19, I=0.01, R = 0.8)
+out = as.data.frame(ode(y=start, times=times, 
+      func=sirmod, parms=parms))
+par(mfrow=c(1,1)) #Make room for side-by-side plots 
+plot(times, out$I, ylab=&quot;Fraction&quot;, xlab=&quot;Time&quot;, 
+      type=&quot;l&quot;)</code></pre>
+<p><img src="ModelMecODE-SIR-II_files/figure-html/abierta-1.png" width="672" /></p>
+</div>
+<div id="referencias" class="section level2">
+<h2>REFERENCIAS</h2>
+<ul>
+<li><p><strong>Beckley, R., Weatherspoon, C., Alexander, M., Chandler, M., Johnson, A., Bhatt, G.S.</strong> n.d. <a href="https://simiode.org/resources/3734/download/2013-StudentGroupProjectEpidemics.pdf">Modeling epidemics with diﬀerential equations</a>. Tennessee State University</p></li>
+<li><p><strong>Bjørnstad, O.N.</strong>, 2018. Epidemics: Models and Data using R, Use R! Springer International Publishing, Cham. <a href="https://doi.org/10.1007/978-3-319-97487-3" class="uri">https://doi.org/10.1007/978-3-319-97487-3</a></p></li>
+<li><p><strong>Keeling, M.J., Rohani, P.</strong> 2008. Modeling infectious diseases in humans and animals. Princeton University Press, Princeton.</p></li>
+<li><p><strong>Krylova, O., Earn, D.J.D.</strong> 2013. Effects of the infectious period distribution on predicted transitions in childhood disease dynamics. <em>J R Soc Interface 10</em>. <a href="https://doi.org/10.1098/rsif.2013.0098" class="uri">https://doi.org/10.1098/rsif.2013.0098</a></p></li>
+<li><p><strong>Wearing, H.J., Rohani, P., Keeling, M.J.</strong> 2005. Appropriate Models for the Management of Infectious Diseases. <em>PLoS Med 2</em>. <a href="https://doi.org/10.1371/journal.pmed.0020174" class="uri">https://doi.org/10.1371/journal.pmed.0020174</a></p></li>
+</ul>
+</div>
+</div>
+
+
+
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.odd').parent('tbody').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open');
+  });
+});
+</script>
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

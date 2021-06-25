@@ -1,0 +1,70 @@
+---
+title: 'MeCoBi: Series de Tiempo - Predicción'
+author: "D. S. Fernandez del Viso"
+date: "Septiembre 2018"
+output:
+  html_document:
+    toc: yes
+    toc_depth: 4
+  html_notebook: null
+  slidy_presentation:
+    incremental: yes
+  word_document:
+    toc: yes
+---
+#Series de Tiempo
+
+
+```{r seriest, message=FALSE}
+#datos San_Juan_Training_Data
+library(readr)
+sanjuan_dengue <- read_csv("San_Juan_Training_Data.csv")
+#crear objeto ts
+tsdengue <- ts(sanjuan_dengue$total_cases, start = c(1990, 4), end = c(2009, 4), frequency = 52)
+max(tsdengue)
+min(tsdengue)
+```
+
+```{r}
+#gráfica sencilla
+plot(tsdengue)
+```
+
+```{r}
+#descomposición de la ts
+fit.dengue <- stl(tsdengue, s.window = "periodic")
+plot(fit.dengue)
+```
+
+```{r message=FALSE}
+#gráficas para ver detalles de meses y estacionalidad
+library(forecast)
+monthplot(tsdengue, xlab = "", ylab = "")
+seasonplot(tsdengue, year.labels = TRUE, main = "", type = "l")
+```
+
+```{r}
+#predicción
+#AZN (no estacional)
+predict.dengue <- ets(tsdengue, model = "AZN")
+plot(forecast(predict.dengue, 104), xlab = "Año", ylab = "Casos")
+```
+
+```{r}
+#estacional automatico
+pred.dengue <- stl(tsdengue, s.window = "periodic")
+plot(forecast(pred.dengue), xlab = "Año", ylab = "Casos", flty = 1)
+```
+
+```{r}
+#ARIMA
+pred.autoarima <- auto.arima(x = tsdengue)
+dengue.for2 <- forecast(object = pred.autoarima, h = 104)
+plot(dengue.for2)
+pred.arima <- Arima(tsdengue, order = c(1,1,1), seasonal = c(1,1,1))
+dengue.for1 <- forecast(object = pred.arima, h = 104)
+plot(dengue.for1)
+```
+
+
+

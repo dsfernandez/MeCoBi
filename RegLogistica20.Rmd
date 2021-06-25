@@ -1,0 +1,175 @@
+---
+title: 'MeCoBi: Modelos de Regresión Logística'
+author: "D. S. Fernández del Viso"
+date: "Septiembre 2020"
+output:
+  slidy_presentation:
+    incremental: yes
+  html_document:
+    toc: yes
+    toc_depth: 4
+  word_document:
+    toc: yes
+---
+
+# Regresión Logística
+
+En una __regresión logística__ la variable respuesta (dependiente) es una _variable binaria_ (dicótoma en términos generales), y las variables predictoras (independientes) pueden ser binarias, categóricas o continuas.  
+
+***  
+
+# Regresión Logística vs. Lineal  
+
+__TUTORIAL__
+[Logistic Regression vs Linear Regression](https://www.machinelearningplus.com/machine-learning/logistic-regression-tutorial-examples-r/)
+![](linear_vs_logistic_regression.jpg)
+
+Si se aplica una __regresión lineal__ los valores de predicción de Y pueden exceder los límites 0 y 1.
+
+***  
+
+# 'Odd ratios' y _logit_
+
+Como la variable respuesta solo puede tener valores entre 0 o 1, y las variables independientes pueden ser continuas, con cualquier valor real, para formular un modelo de regresión logística se hace una transformación de probabilidades a 'razones de probabilidades' (en inglés __odd ratios (ORs)__), o proporción de casos favorables a desfavorables.
+
+La transformación tiene esta forma:
+
+$$OR_i = \frac{\pi}{1-\pi} \qquad (1)$$
+donde $\pi$ es la probabilidad de que el evento dependiente ($Y$) ocurra; luego se calcula el logaritmo del $OR$, el cual se denomina _logit_:
+
+$$logit = log\frac{\pi}{1-\pi} \qquad (2)$$
+
+***  
+
+# Modelo de Regresión Logística
+
+El modelo para la regresión, con dos variables independientes ($x_1$, $x_2$), es:
+
+$$logit=\beta_0 + x_1\beta_1 +x_2\beta_2\qquad (3)$$
+
+***  
+
+# EJEMPLO 1: Predicción de alta presión en mujeres
+Vamos a explorar un modelo de diagnóstico de alta presión, a partir de datos de mujeres (n = 189), en relación a su edad, estado de menopausia, y el índice de masa corporal.  Los datos están codificados como variables binarias:
+
+|Variables|Nombre|Código|
+|:--------|:-----|:-----:|
+|Edad (años)|age|0:≤50, 1>50|
+|Alta presión|dxhigh|0:no, 1:sí|
+|BMI (kg/m2)|bmi|0:≤25, 1:>25|
+|Menopausia|menop|0:pre-, 1:menopausia|
+
+Para este modelo utilizaremos la función __glm__ (general linear model):
+```{r logistic, message=FALSE, warning=FALSE, include=FALSE}
+#leemos los datos:
+library(readxl)
+hbp <- read_excel("mod_empiricos.xlsx", 
+                            sheet = "hbp")
+```
+
+***  
+
+# Modelo logístico con glm
+Se usa __family = binomial()__.  
+
+```{r message=FALSE, warning=FALSE}
+#modelo logístico:
+highbp <- glm(dxhigh ~ age + bmi + menop, data = hbp,
+              family=binomial())
+```
+
+***  
+
+# Resultados de glm - prueba de hipótesis
+
+```{r resultados}
+#resumen de los resultados:
+summary(highbp)
+```
+
+***  
+
+# Resultados  -  _odd ratios_ 
+```{r oddr, message=FALSE, warning=FALSE}
+#obtener los coeficientes como ORs:
+exp(cbind(OR = coef(highbp), confint(highbp)))
+```
+
+***  
+
+# EJEMPLO 2: Variables predictoras de diabetes tipo 2, en una población de nativos Pima
+En este caso las variables independientes no son binarias (0,1) sino datos continuos.  
+
+### Datos
+```{r message=FALSE, warning=FALSE}
+# paquetes
+library(tidyverse)
+library(caret)
+library(mlbench)
+# cargar datos (estos son directamente del paquete mlbench, en su caso debe usar readxl o similar)
+data("PimaIndiansDiabetes2", package = "mlbench")
+# inspeccionar los datos
+sample_n(PimaIndiansDiabetes2, 6)
+```
+
+***  
+
+# Modelo usando glm - resultados
+```{r message=FALSE, warning=FALSE}
+library(MASS)
+# Fit the model
+model <- glm(diabetes ~., data = PimaIndiansDiabetes2, family = binomial())
+# Summarize the final selected model
+summary(model)
+```
+
+***  
+
+# Resultados como _odd ratios_
+```{r message=FALSE, warning=FALSE}
+# odds
+exp(cbind(OR = coef(model), confint(model)))
+```
+
+
+***
+
+# Gráfica logística diabetes vs glucosa
+```{r message=FALSE, warning=FALSE}
+library(ggplot2)
+#pasar datos de diabetes "pos" y "neg" a 1s y 0s
+diabetes01 <- ifelse(PimaIndiansDiabetes2$diabetes == "pos", 1, 0)
+#gráfica con curva logística
+ggplot(PimaIndiansDiabetes2, aes(x=glucose, y=diabetes01, na.rm = TRUE)) +
+  geom_point() +
+  geom_smooth(method = "glm", 
+    method.args = list(family = "binomial"), 
+    se = TRUE)
+```
+# TITANIC
+
+## Datos
+```{r}
+library(readxl)
+titanic <- read_excel("Titanic.xlsx", na = "NA")
+head(titanic)
+```
+
+## modelo logistico
+```{r message=FALSE, warning=FALSE}
+library(ggplot2)
+library(MASS)
+# Fit the model
+model_1 <- glm(Survived ~ Pclass + Sex + Age + SibSp + Parch + Fare, data = titanic, family = binomial())
+# Summarize the selected model
+summary(model_1)
+# OD ratios
+exp(cbind(OR = coef(model_1), confint(model_1)))
+#gráfica con curva logística
+ggplot(titanic, aes(x=Fare, y=Survived, na.rm = TRUE)) +
+  geom_point() +
+  geom_smooth(method = "glm", 
+    method.args = list(family = "binomial"), 
+    se = TRUE)
+```
+

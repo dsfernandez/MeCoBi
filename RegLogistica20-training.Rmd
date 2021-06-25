@@ -1,0 +1,172 @@
+---
+title: 'MeCoBi: Modelos de Regresión Logística - Training/Test'
+author: "D. S. Fernández del Viso"
+date: "Septiembre 2020"
+output:
+  html_document:
+    toc: yes
+    toc_depth: 4
+  slidy_presentation:
+    incremental: yes
+  word_document:
+    toc: yes
+---
+
+# Regresión Logística
+
+***  
+
+# EJEMPLO Variables predictoras de diabetes tipo 2, en una población de nativos Pima
+En este caso las variables independientes no son binarias (0,1) sino datos continuos.  
+
+### Datos
+```{r message=FALSE, warning=FALSE}
+# paquetes
+library(tidyverse)
+library(caret)
+library(mlbench)
+# cargar datos (estos son directamente del paquete mlbench, en su caso debe usar readxl o similar)
+data("PimaIndiansDiabetes2", package = "mlbench")
+# inspeccionar los datos
+sample_n(PimaIndiansDiabetes2, 6)
+```
+
+***  
+
+# Modelo usando glm - resultados
+```{r message=FALSE, warning=FALSE}
+library(MASS)
+# Fit the model
+model <- glm(diabetes ~., data = PimaIndiansDiabetes2, family = binomial())
+# Summarize the final selected model
+summary(model)
+```
+
+***  
+
+# Resultados como _odd ratios_
+```{r message=FALSE, warning=FALSE}
+# odds
+exp(cbind(OR = coef(model), confint(model)))
+```
+
+
+***
+
+# Gráfica logística diabetes vs glucosa
+```{r message=FALSE, warning=FALSE}
+library(ggplot2)
+#pasar datos de diabetes "pos" y "neg" a 1s y 0s
+diabetes01 <- ifelse(PimaIndiansDiabetes2$diabetes == "pos", 1, 0)
+#gráfica con curva logística
+ggplot(PimaIndiansDiabetes2, aes(x=glucose, y=diabetes01, na.rm = TRUE)) +
+  geom_point() +
+  geom_smooth(method = "glm", 
+    method.args = list(family = "binomial"), 
+    se = TRUE)
+```
+
+***  
+
+# Usando datos training/test  
+
+```{r}
+# Split the data into training and test set
+set.seed(123)
+training.samples <- PimaIndiansDiabetes2$diabetes %>% 
+  createDataPartition(p = 0.8, list = FALSE)
+train.data  <- PimaIndiansDiabetes2[training.samples, ]
+test.data <- PimaIndiansDiabetes2[-training.samples, ]
+```
+
+***  
+
+# Regresión logística con datos training
+
+```{r}
+library(MASS)
+# Fit the model
+model_t <- glm(diabetes ~ ., data = train.data, family = binomial)
+# Summarize the final selected model
+summary(model_t)
+```
+
+***  
+
+# Predicciones con el 20% de losdatos (test)
+
+```{r}
+# Make predictions
+probabilities <- model_t %>% predict(test.data, type = "response")
+predicted.classes <- ifelse(probabilities > 0.5, "pos", "neg")
+# Prediction accuracy
+observed.classes <- test.data$diabetes
+mean(predicted.classes == observed.classes, na.rm = TRUE)
+```
+
+***  
+
+# TITANIC
+
+## Datos
+```{r}
+library(readxl)
+titanic <- read_excel("Titanic.xlsx", na = "NA")
+head(titanic)
+```
+
+## modelo logistico
+```{r message=FALSE, warning=FALSE}
+library(ggplot2)
+library(MASS)
+# Fit the model
+model_1 <- glm(Survived ~ Pclass + Sex + Age + SibSp + Parch + Fare, data = titanic, family = binomial())
+# Summarize the selected model
+summary(model_1)
+# OD ratios
+exp(cbind(OR = coef(model_1), confint(model_1)))
+#gráfica con curva logística
+ggplot(titanic, aes(x=Fare, y=Survived, na.rm = TRUE)) +
+  geom_point() +
+  geom_smooth(method = "glm", 
+    method.args = list(family = "binomial"), 
+    se = TRUE)
+```
+
+***  
+
+# Usando datos training/test
+
+```{r}
+set.seed(123)
+training.samples <- c(titanic$Survived) %>% 
+  createDataPartition(p = 0.8, list = FALSE)
+train.data_t  <- titanic[training.samples, ]
+test.data_t <- titanic[-training.samples, ]
+```
+
+***  
+
+# Regresión logística con training data
+
+```{r}
+library(MASS)
+# Fit the model
+model_tt <- glm(Survived ~ Pclass + Sex + Age + SibSp + Parch + Fare, data = train.data_t, family = binomial)
+# Summarize the final selected model
+summary(model_tt)
+```
+
+***  
+
+# Predicciones con el test data
+
+```{r}
+# Make predictions
+probabilities <- model_tt %>% predict(test.data_t, type = "response")
+predicted.classes <- ifelse(probabilities > 0.5, "1", "0")
+# Prediction accuracy
+observed.classes <- test.data_t$Survived
+mean(predicted.classes == observed.classes, na.rm = TRUE)
+```
+

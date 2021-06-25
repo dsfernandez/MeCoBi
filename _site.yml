@@ -6,13 +6,15 @@ navbar:
       icon: fa-home
       href: home.html
     - text: "Modelos de Regresión"
-      icon: fa-home
+      menu:
     - text: "Series de Tiempo"
       menu:
     - text: "Modelos Dinámicos"
       menu:
       - text: "SIR-I"
         href: ModelMecODE-SIR-I.html
+      - text: "SIR-II"
+        href: ModelMecODE-SIR-II.html
     - text: "Modelos Espaciales"
       menu:
     - text: "Modelos Basados en Agentes"
