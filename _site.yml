@@ -18,7 +18,7 @@ navbar:
     - text: "Modelos Dinámicos"
       menu:
       - text: "Modelo Epidemiológico"
-        href: modelEpidem.html
+        href: modelsEpidem.html
       - text: "SIR-I"
         href: ModelMecODE-SIR-I.html
       - text: "SIR-II"
