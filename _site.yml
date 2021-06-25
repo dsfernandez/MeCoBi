@@ -6,7 +6,7 @@ navbar:
       icon: fa-home
       href: home.html
     - text: "Modelos de Regresión"
-      icon: ion-icon-stats-chart-outline
+      icon: fa-dove
       menu:
     - text: "Series de Tiempo"
       menu:
