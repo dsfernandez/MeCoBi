@@ -255,7 +255,7 @@ $(document).ready(function () {
 <li class="dropdown-header">Series de Tiempo</li>
 <li class="dropdown">
   <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
-    Sistemodinámica
+    Modelos Dinámicos
      
     <span class="caret"></span>
   </a>
@@ -265,6 +265,8 @@ $(document).ready(function () {
     </li>
   </ul>
 </li>
+<li class="dropdown-header">Modelos Espaciales</li>
+<li class="dropdown-header">Modelos Basados en Agentes</li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
         
@@ -622,11 +624,11 @@ out &lt;- as.data.frame(out*N) #aqui puede multiplicar &#39;out&#39; por N
 head(out)</code></pre>
 <pre><code>##   time         S            I         R
 ## 1    0 0.1000000 1.000000e-06 0.8999990
-## 2    1 0.1001796 1.154950e-06 0.8998192
-## 3    2 0.1003596 1.334768e-06 0.8996396
-## 4    3 0.1005387 1.540934e-06 0.8994599
-## 5    4 0.1007179 1.785449e-06 0.8992804
-## 6    5 0.1008965 2.064050e-06 0.8991010</code></pre>
+## 2    1 0.1001754 1.152144e-06 0.8998192
+## 3    2 0.1003550 1.330927e-06 0.8996396
+## 4    3 0.1005355 1.535505e-06 0.8994599
+## 5    4 0.1007139 1.773173e-06 0.8992804
+## 6    5 0.1008919 2.047505e-06 0.8991009</code></pre>
 <pre class="r"><code>#gráficas individuales
 #infectados
 ggplot(data=out, 

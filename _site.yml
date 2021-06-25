@@ -1,5 +1,4 @@
 name: "MeCoBi"
-output_dir: "."
 navbar:
   title: "MeCoBi"
   left:
@@ -10,12 +9,17 @@ navbar:
       menu:
     - text: "Series de Tiempo"
       menu:
-    - text: "Sistemodinámica"
+    - text: "Modelos Dinámicos"
       menu:
       - text: "SIR-I"
         href: ModelMecODE-SIR-I.html
-
+    - text: "Modelos Espaciales"
+      menu:
+    - text: "Modelos Basados en Agentes"
+      menu:
+output_dir: "."
 output:
   html_document:
+    theme: cosmo
     highlight: textmate
 
