@@ -6,9 +6,3 @@ output:
     toc: yes
     toc_float: yes
 ---
-
-## ref 1
-
-## ref 2
-
-## ref 3
