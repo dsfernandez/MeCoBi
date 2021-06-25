@@ -286,7 +286,7 @@ $(document).ready(function () {
   </a>
   <ul class="dropdown-menu" role="menu">
     <li>
-      <a href="modelEpidem.html">Modelo Epidemiológico</a>
+      <a href="modelsEpidem.html">Modelo Epidemiológico</a>
     </li>
     <li>
       <a href="ModelMecODE-SIR-I.html">SIR-I</a>
@@ -655,11 +655,11 @@ out &lt;- as.data.frame(out*N) #aqui puede multiplicar &#39;out&#39; por N
 head(out)</code></pre>
 <pre><code>##   time         S            I         R
 ## 1    0 0.1000000 1.000000e-06 0.8999990
-## 2    1 0.1001832 1.152710e-06 0.8998192
-## 3    2 0.1003631 1.327503e-06 0.8996395
-## 4    3 0.1005422 1.530209e-06 0.8994599
-## 5    4 0.1007211 1.764640e-06 0.8992804
-## 6    5 0.1009046 2.038858e-06 0.8991009</code></pre>
+## 2    1 0.1001796 1.152997e-06 0.8998192
+## 3    2 0.1003591 1.330245e-06 0.8996396
+## 4    3 0.1005385 1.536221e-06 0.8994599
+## 5    4 0.1007176 1.774616e-06 0.8992804
+## 6    5 0.1008957 2.050309e-06 0.8991010</code></pre>
 <pre class="r"><code>#gráficas individuales
 #infectados
 ggplot(data=out, 
