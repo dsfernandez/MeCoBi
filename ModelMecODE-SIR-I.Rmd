@@ -1,0 +1,419 @@
+---
+title: "Modelo SIR con Ecuaciones Diferenciales"
+author: "D. S. Fernandez del Viso"
+date: "2020.10.14"
+output:
+  html_document: default
+  word_document: default
+---
+
+# Ecuaciones diferenciales para el modelo SIR
+
+Las ecuaciones básicas del modelo SIR (sin demografía, o nacimientos iguales a muertes), para cada compartimento, son las siguientes:
+
+$$\frac {dS}{dt} = -\beta SI$$
+$$\frac {dI}{dt} = \beta SI - \gamma I$$
+$$\frac {dR}{dt} = \gamma I$$
+
+## Descripción y parámetros del modelo  
+
+* El modelo SIR asume el contacto (directo o mediante vector) entre individuos susceptibles (_X_) e infectados (_Y_), lo cual significa una _transmisión por acción de masas_, y por lo tanto es dependiente de la frecuencia de cada grupo actuando (susceptibles e infectados).  Por esta razón, y para estandarizar el modelo para cualquier tamaño poblacional (_N_), utilizamos las proporciones de cada grupo:  
+
+$$S = X/N$$
+$$I = Y/N$$
+Igual lo hacemos para los recuperados en el modelo (_R_):
+$$R = Z/N$$
+
+* El parámetro __$\beta$__ es el producto de la tasa de contacto y la probabilidad de transmisión de la infección.  También se utiliza la expresión $\lambda = \beta I$ para indicar la _fuerza de infección_.  
+* El parámetro __$\gamma$__ se denomina _tasa de remoción o recuperación_ (usaremos recuperación); a partir de datos epidemiológicos se puede obtener el _período infeccioso_, que es el recíproco $1/\gamma$.  
+* Un parámetro derivado de los anteriores, es uno de los números más famosos de la epidemiología es la _razón reproductiva básica_, __$R_0$__, que se cuantifica como el número promedio de casos secundarios que se derivan de un caso primario promedio, en una población totalmente susceptible.  
+* Podemos demostrar que cuando la proporción de susceptibles iniciales, $S(0)$, es menor que $\gamma /\beta$, la _tasa relativa de remoción_, la infección no procede (esto se conoce como el umbral de infección).
+* El inverso de $\gamma /\beta$, por otra parte, expresa la _razón reproductiva básica_, __$R_0$__.
+
+## Ejercicios con el modelo SIR y ecuaciones diferenciales en R
+
+### Uso de deSolve en R
+
+*  El paquete [__deSolve__](http://desolve.r-forge.r-project.org/) en R permite resolver sistemas de _ecuaciones diferenciales ordinarias_ (ODE), asi como otras, cuando se conocen las condiciones iniciales.
+
+#### Resolución de ecuaciones del modelo SIR
+
+```{r desolve.sir}
+library(deSolve)
+#tamaño poblacional
+N = 1
+#estado inicial de los compartimentos
+init <- c(S = 1-1e-6,
+          I = 1e-6,
+          R = 0)
+#parámetros del modelo (coeficientes de las variables)
+param <- c(beta = 2.0,
+           gamma = 0.2)
+#crear la función con las ODE
+sir <- function(times, init, param) {
+  with(as.list(c(init, param)), {
+#ecuaciones diferenciales   
+    dS <- -beta * S * I
+    dI <-  beta * S * I - gamma * I
+    dR <-                 gamma * I
+#resultados de las tasas de cambio    
+    return(list(c(dS, dI, dR)))
+  })
+}
+#intervalo de tiempo y resolución
+times <- seq(0, 20, by = .1)
+#resolver el sistema de ecuaciones con función 'ode'
+out <- ode(y = init, times = times, func = sir, parms = param)
+#cambiar out a un data.frame
+out <- as.data.frame(out*N) #aqui puede multiplicar 'out' por N
+# ver resultados
+head(out)
+```
+
+A continuación vamos a rearreglar los datos de los resultados (__out__), usando el paquete __tidyverse__.  Esto facilita otros análisis y la gráficación de los resultados.
+
+```{r tidy.gather, message=FALSE, warning=FALSE}
+library(tidyverse)
+new.out <- as.data.frame(out) %>% gather(key, value, -time) 
+head(new.out)
+```
+
+En este nuevo objeto, _new.out_, la variable _key_ contiene los grupos $S$, $I$, y $R$, y _value_ el respectivo valor del grupo en ese tiempo (_time_).
+
+Ahora construiremos una gráfica usando el paquete __ggplot2__:
+
+```{r ggplot.sir, echo=FALSE}
+library(ggplot2)
+ggplot(data=new.out, 
+       aes(x = time,
+           y = value,
+           group = key,
+           col = key
+           )) + 
+      ylab("Proporción de N") + xlab("Tiempo (días)") +
+      geom_line(size = 1) + 
+      scale_colour_manual(values = c("red", "green4", "blue"), name = "Grupo") +
+      scale_y_continuous(labels = waiver(), limits = c(0, 1))
+```
+
+Un dato importante es el valor máximo de infectados:
+
+```{r max.infectados}
+# valor máximo de I y tiempo usando un pipe
+new.out %>% 
+  filter(key=="I") %>% 
+  filter(value==max(value)) %>% 
+  mutate(maxI = round(N * value, 2)) %>%
+  select(time, maxI)
+# valor de S_umbral
+out$S[which.max(out$I)]
+```
+
+
+## Modelo SIR para sarampión en Humacao
+
+__El problema__: si se declara una epidemia de sarampión en Humacao, es muy probable no contar con las camas suficientes para los enfermos. Hay que comprobarlo.
+
+_Datos a buscar_:
+
+* población de Humacao
+* número de camas en hospitales
+* parámetros del sarampión
+
+_Usar el modelo SIR en R_.  
+
+_Proponer soluciones_.
+
+```{r sir.pueblo}
+library(deSolve)
+#tamaño poblacional
+N = 50000
+#estado inicial de los compartimentos
+init <- c(S = 1-1/50000,
+          I = 1/50000,
+          R = 0)
+#parámetros del modelo (coeficientes de las variables)
+param <- c(beta = 3.4,
+           gamma = 0.2)
+#crear la función con las ODE
+sir <- function(times, init, param) {
+  with(as.list(c(init, param)), {
+#ecuaciones diferenciales   
+    dS <- -beta * S * I
+    dI <-  beta * S * I - gamma * I
+    dR <-                 gamma * I
+#resultados de las tasas de cambio    
+    return(list(c(dS, dI, dR)))
+  })
+}
+#intervalo de tiempo y resolución
+times <- seq(0, 20, by = .1)
+#resolver el sistema de ecuaciones con función 'ode'
+out <- ode(y = init, times = times, func = sir, parms = param)
+#cambiar out a un data.frame
+out <- as.data.frame(out)
+head(out, 3)
+#rearreglo del output
+new.out <- as.data.frame(out) %>%
+  gather(key, value, -time) %>%
+  mutate(value=value*N) #de proporción a individuos
+head(new.out, 3)
+#gráfica conjunta
+ggplot(data=new.out, 
+       aes(x = time,
+           y = value,
+           group = key,
+           col = key
+           )) + 
+      ylab("Individuos") + xlab("Tiempo (días)") +
+      geom_line(size = 1) + 
+      scale_colour_manual(values = c("red", "green4", "blue"), name = "Grupo") +
+      scale_y_continuous(labels = waiver(), limits = c(0, 60000))
+# nivel máximo de infección
+new.out %>% 
+  filter(key=="I") %>% 
+  filter(value==max(value)) %>% 
+  mutate(maxI = round(value, 0)) %>%
+  select(time, maxI)
+```
+
+### Vacunación
+
+```{r}
+library(deSolve)
+#tamaño poblacional
+N = 50000
+pV = 0.6
+effV = 0.95
+#estado inicial de los compartimentos
+init <- c(S = 1-1/50000-pV*effV,
+          I = 1/50000,
+          R = 0,
+          V = pV*effV)
+#parámetros del modelo (coeficientes de las variables)
+param <- c(beta = 3,
+           gamma = 0.5)
+#crear la función con las ODE
+sirv <- function(times, init, param) {
+  with(as.list(c(init, param)), {
+#ecuaciones diferenciales   
+    dS <- -beta * S * I
+    dI <-  beta * S * I - gamma * I
+    dR <-                 gamma * I
+    dV <- 0
+#resultados de las tasas de cambio    
+    return(list(c(dS, dI, dR, dV)))
+  })
+}
+#intervalo de tiempo y resolución
+times <- seq(0, 90, by = .1)
+#resolver el sistema de ecuaciones con función 'ode'
+out <- ode(y = init, times = times, func = sirv, parms = param)
+#cambiar out a un data.frame
+out <- as.data.frame(out)
+#eliminar la variable 'V' en out
+out$V <- NULL
+#mostrar 10 primeros datos
+head(out, 3)
+#rearreglo del output
+new.out <- as.data.frame(out) %>%
+  gather(key, value, -time) %>%
+  mutate(value=value*N) #de proporción a individuos
+head(new.out, 3)
+#gráfica conjunta
+ggplot(data=new.out, 
+       aes(x = time,
+           y = value,
+           group = key,
+           col = key
+           )) + 
+      ylab("Individuos") + xlab("Tiempo (días)") +
+      geom_line(size = 1) + 
+      scale_colour_manual(values = c("red", "green4", "blue"), name = "Grupo") +
+      scale_y_continuous(labels = waiver(), limits = c(0, N-N*pV*effV))
+# nivel máximo de infección
+new.out %>% 
+  filter(key=="I") %>% 
+  filter(value==max(value)) %>% 
+  mutate(maxI = round(value, 0)) %>%
+  select(time, maxI)
+```
+
+
+### Modelo SIR con parámetro demográfico $\mu$
+
+```{r mu.sir}
+library(deSolve)
+library(tidyverse)
+#tamaño poblacional
+N = 1
+#estado inicial de los compartimentos
+init <- c(S = 0.2,
+          I = 1e-6,
+          R = 0.8 - 1e-6)
+#parámetros del modelo (coeficientes de las variables)
+param <- c(beta = 2.4,
+           gamma = 0.2,
+           mu = 2e-4)
+#crear la función con las ODE
+sir <- function(times, init, param) {
+  with(as.list(c(init, param)), {
+#ecuaciones diferenciales   
+    dS <- mu - beta * S * I - mu * S
+    dI <-  beta * S * I - gamma * I - mu * I
+    dR <-                 gamma * I - mu * R
+#resultados de las tasas de cambio    
+    return(list(c(dS, dI, dR)))
+  })
+}
+#intervalo de tiempo y resolución
+times <- seq(0, 3650, by = 1)
+#resolver el sistema de ecuaciones con función 'ode'
+out <- ode(y = init, times = times, func = sir, parms = param)
+#cambiar out a un data.frame
+out <- as.data.frame(out)
+#mostrar 3 primeros datos
+head(out, 3)
+#gráficas individuales
+#infectados
+ggplot(data=out, 
+       aes(x = time,
+           y = I)) +
+      ylab("Proporción") + xlab("Tiempo (días)") +
+  ggtitle("Infectados") +
+      geom_line(size = 0.5, col = "red") + 
+      scale_y_continuous(labels = waiver())
+#susceptibles
+ggplot(data=out, 
+       aes(x = time,
+           y = S)) +
+      ylab("Proporción") + xlab("Tiempo (días)") +
+  ggtitle("Susceptibles") +
+      geom_line(size = 0.5, col = "blue") + 
+      scale_y_continuous(labels = waiver())
+#recuperados
+ggplot(data=out, 
+       aes(x = time,
+           y = R)) +
+      ylab("Proporción") + xlab("Tiempo (días)") +
+  ggtitle("Recuperados") +
+      geom_line(size = 0.5, col = "green") + 
+      scale_y_continuous(labels = waiver())
+```
+
+
+### Modelo SIR demográfico y aleatorio
+
+```{r}
+library(deSolve)
+#tamaño poblacional
+N = 1
+#estado inicial de los compartimentos
+init <- c(S = 0.1,
+          I = 1e-6,
+          R = 0.9 - 1e-6)
+#parámetros del modelo (coeficientes de las variables)
+param <- c(beta = 3.4,
+           gamma = 0.2,
+           mu = 2e-4)
+#crear la función con las ODE
+sir <- function(times, init, param) {
+  with(as.list(c(init, param)), {
+#ecuaciones diferenciales   
+    dS <- mu - beta * S * I * runif(1, 0.999, 1.001) - mu * S
+    dI <-  beta * S * I - gamma * I - mu * I
+    dR <-                 gamma * I - mu * R
+#resultados de las tasas de cambio    
+    return(list(c(dS, dI, dR)))
+  })
+}
+#intervalo de tiempo y resolución
+times <- seq(0, 3650, by = 1)
+#resolver el sistema de ecuaciones con función 'ode'
+out <- ode(y = init, times = times, func = sir, parms = param)
+#cambiar out a un data.frame
+out <- as.data.frame(out*N) #aqui puede multiplicar 'out' por N
+#mostrar 6 primeros datos
+head(out)
+#gráficas individuales
+#infectados
+ggplot(data=out, 
+       aes(x = time,
+           y = I)) +
+      ylab("Proporción") + xlab("Tiempo (días)") +
+  ggtitle("Infectados") +
+      geom_line(size = 0.5, col = "red") + 
+      scale_y_continuous(labels = waiver())
+#susceptibles
+ggplot(data=out, 
+       aes(x = time,
+           y = S)) +
+      ylab("Proporción") + xlab("Tiempo (días)") +
+  ggtitle("Susceptibles") +
+      geom_line(size = 0.5, col = "blue") + 
+      scale_y_continuous(labels = waiver())
+#recuperados
+ggplot(data=out, 
+       aes(x = time,
+           y = R)) +
+      ylab("Proporción") + xlab("Tiempo (días)") +
+  ggtitle("Recuperados") +
+      geom_line(size = 0.5, col = "green") + 
+      scale_y_continuous(labels = waiver())
+```
+
+# Modelo con disminución de contactos (distanciamiento físico)
+
+```{r sir.contact}
+library(deSolve)
+#tamaño poblacional
+N = 50000
+#estado inicial de los compartimentos
+init <- c(S = 1-1/50000,
+          I = 1/50000,
+          R = 0)
+#parámetros del modelo (coeficientes de las variables)
+param <- c(beta = 3.4,
+           gamma = 0.2,
+           rho = 1)
+#crear la función con las ODE
+sir <- function(times, init, param) {
+  with(as.list(c(init, param)), {
+#ecuaciones diferenciales   
+    dS <- -rho * beta * S * I
+    dI <-  rho * beta * S * I - gamma * I
+    dR <-                 gamma * I
+#resultados de las tasas de cambio    
+    return(list(c(dS, dI, dR)))
+  })
+}
+#intervalo de tiempo y resolución
+times <- seq(0, 20, by = .1)
+#resolver el sistema de ecuaciones con función 'ode'
+out <- ode(y = init, times = times, func = sir, parms = param)
+#cambiar out a un data.frame
+out <- as.data.frame(out)
+head(out, 3)
+#rearreglo del output
+new.out <- as.data.frame(out) %>%
+  gather(key, value, -time) %>%
+  mutate(value=value*N) #de proporción a individuos
+head(new.out, 3)
+#gráfica conjunta
+ggplot(data=new.out, 
+       aes(x = time,
+           y = value,
+           group = key,
+           col = key
+           )) + 
+      ylab("Individuos") + xlab("Tiempo (días)") +
+      geom_line(size = 1) + 
+      scale_colour_manual(values = c("red", "green4", "blue"), name = "Grupo") +
+      scale_y_continuous(labels = waiver(), limits = c(0, 60000))
+# nivel máximo de infección
+new.out %>% 
+  filter(key=="I") %>% 
+  filter(value==max(value)) %>% 
+  mutate(maxI = round(value, 0)) %>%
+  select(time, maxI)
+```

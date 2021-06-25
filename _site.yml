@@ -12,6 +12,8 @@ navbar:
       menu:
     - text: "Sistemodinámica"
       menu:
+      - text: "SIR-I"
+        href: ModelMecODE-SIR-I.html
 
 output:
   html_document:

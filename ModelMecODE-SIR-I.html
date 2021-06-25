@@ -1,0 +1,773 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+<meta name="author" content="D. S. Fernandez del Viso" />
+
+
+<title>Modelo SIR con Ecuaciones Diferenciales</title>
+
+<script src="site_libs/header-attrs-2.9/header-attrs.js"></script>
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/bootstrap.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<style>h1 {font-size: 34px;}
+       h1.title {font-size: 38px;}
+       h2 {font-size: 30px;}
+       h3 {font-size: 24px;}
+       h4 {font-size: 18px;}
+       h5 {font-size: 16px;}
+       h6 {font-size: 12px;}
+       code {color: inherit; background-color: rgba(0, 0, 0, 0.04);}
+       pre:not([class]) { background-color: white }</style>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<link href="site_libs/font-awesome-5.1.0/css/all.css" rel="stylesheet" />
+<link href="site_libs/font-awesome-5.1.0/css/v4-shims.css" rel="stylesheet" />
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+<style type="text/css">code{white-space: pre;}</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+pre code {
+  padding: 0;
+}
+</style>
+
+
+<style type="text/css">
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #adb5bd;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script type="text/javascript">
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.tab('show');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+
+  // Navbar adjustments
+  var navHeight = $(".navbar").first().height() + 15;
+  var style = document.createElement('style');
+  var pt = "padding-top: " + navHeight + "px; ";
+  var mt = "margin-top: -" + navHeight + "px; ";
+  var css = "";
+  // offset scroll position for anchor links (for fixed navbar)
+  for (var i = 1; i <= 6; i++) {
+    css += ".section h" + i + "{ " + pt + mt + "}\n";
+  }
+  style.innerHTML = "body {" + pt + "padding-bottom: 40px; }\n" + css;
+  document.head.appendChild(style);
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "&#xe258;";
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">MeCoBi</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="home.html">
+    <span class="fa fa-home"></span>
+     
+    Hola
+  </a>
+</li>
+<li class="dropdown-header">Modelos de Regresión</li>
+<li class="dropdown-header">Series de Tiempo</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    Sistemodinámica
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="ModelMecODE-SIR-I.html">SIR-I</a>
+    </li>
+  </ul>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div id="header">
+
+
+
+<h1 class="title toc-ignore">Modelo SIR con Ecuaciones Diferenciales</h1>
+<h4 class="author">D. S. Fernandez del Viso</h4>
+<h4 class="date">2020.10.14</h4>
+
+</div>
+
+
+<div id="ecuaciones-diferenciales-para-el-modelo-sir" class="section level1">
+<h1>Ecuaciones diferenciales para el modelo SIR</h1>
+<p>Las ecuaciones básicas del modelo SIR (sin demografía, o nacimientos iguales a muertes), para cada compartimento, son las siguientes:</p>
+<p><span class="math display">\[\frac {dS}{dt} = -\beta SI\]</span> <span class="math display">\[\frac {dI}{dt} = \beta SI - \gamma I\]</span> <span class="math display">\[\frac {dR}{dt} = \gamma I\]</span></p>
+<div id="descripción-y-parámetros-del-modelo" class="section level2">
+<h2>Descripción y parámetros del modelo</h2>
+<ul>
+<li>El modelo SIR asume el contacto (directo o mediante vector) entre individuos susceptibles (<em>X</em>) e infectados (<em>Y</em>), lo cual significa una <em>transmisión por acción de masas</em>, y por lo tanto es dependiente de la frecuencia de cada grupo actuando (susceptibles e infectados). Por esta razón, y para estandarizar el modelo para cualquier tamaño poblacional (<em>N</em>), utilizamos las proporciones de cada grupo:</li>
+</ul>
+<p><span class="math display">\[S = X/N\]</span> <span class="math display">\[I = Y/N\]</span> Igual lo hacemos para los recuperados en el modelo (<em>R</em>): <span class="math display">\[R = Z/N\]</span></p>
+<ul>
+<li>El parámetro <strong><span class="math inline">\(\beta\)</span></strong> es el producto de la tasa de contacto y la probabilidad de transmisión de la infección. También se utiliza la expresión <span class="math inline">\(\lambda = \beta I\)</span> para indicar la <em>fuerza de infección</em>.<br />
+</li>
+<li>El parámetro <strong><span class="math inline">\(\gamma\)</span></strong> se denomina <em>tasa de remoción o recuperación</em> (usaremos recuperación); a partir de datos epidemiológicos se puede obtener el <em>período infeccioso</em>, que es el recíproco <span class="math inline">\(1/\gamma\)</span>.<br />
+</li>
+<li>Un parámetro derivado de los anteriores, es uno de los números más famosos de la epidemiología es la <em>razón reproductiva básica</em>, <strong><span class="math inline">\(R_0\)</span></strong>, que se cuantifica como el número promedio de casos secundarios que se derivan de un caso primario promedio, en una población totalmente susceptible.<br />
+</li>
+<li>Podemos demostrar que cuando la proporción de susceptibles iniciales, <span class="math inline">\(S(0)\)</span>, es menor que <span class="math inline">\(\gamma /\beta\)</span>, la <em>tasa relativa de remoción</em>, la infección no procede (esto se conoce como el umbral de infección).</li>
+<li>El inverso de <span class="math inline">\(\gamma /\beta\)</span>, por otra parte, expresa la <em>razón reproductiva básica</em>, <strong><span class="math inline">\(R_0\)</span></strong>.</li>
+</ul>
+</div>
+<div id="ejercicios-con-el-modelo-sir-y-ecuaciones-diferenciales-en-r" class="section level2">
+<h2>Ejercicios con el modelo SIR y ecuaciones diferenciales en R</h2>
+<div id="uso-de-desolve-en-r" class="section level3">
+<h3>Uso de deSolve en R</h3>
+<ul>
+<li>El paquete <a href="http://desolve.r-forge.r-project.org/"><strong>deSolve</strong></a> en R permite resolver sistemas de <em>ecuaciones diferenciales ordinarias</em> (ODE), asi como otras, cuando se conocen las condiciones iniciales.</li>
+</ul>
+<div id="resolución-de-ecuaciones-del-modelo-sir" class="section level4">
+<h4>Resolución de ecuaciones del modelo SIR</h4>
+<pre class="r"><code>library(deSolve)
+#tamaño poblacional
+N = 1
+#estado inicial de los compartimentos
+init &lt;- c(S = 1-1e-6,
+          I = 1e-6,
+          R = 0)
+#parámetros del modelo (coeficientes de las variables)
+param &lt;- c(beta = 2.0,
+           gamma = 0.2)
+#crear la función con las ODE
+sir &lt;- function(times, init, param) {
+  with(as.list(c(init, param)), {
+#ecuaciones diferenciales   
+    dS &lt;- -beta * S * I
+    dI &lt;-  beta * S * I - gamma * I
+    dR &lt;-                 gamma * I
+#resultados de las tasas de cambio    
+    return(list(c(dS, dI, dR)))
+  })
+}
+#intervalo de tiempo y resolución
+times &lt;- seq(0, 20, by = .1)
+#resolver el sistema de ecuaciones con función &#39;ode&#39;
+out &lt;- ode(y = init, times = times, func = sir, parms = param)
+#cambiar out a un data.frame
+out &lt;- as.data.frame(out*N) #aqui puede multiplicar &#39;out&#39; por N
+# ver resultados
+head(out)</code></pre>
+<pre><code>##   time         S            I            R
+## 1  0.0 0.9999990 1.000000e-06 0.000000e+00
+## 2  0.1 0.9999988 1.197789e-06 2.197659e-08
+## 3  0.2 0.9999985 1.434672e-06 4.829699e-08
+## 4  0.3 0.9999982 1.718390e-06 7.982122e-08
+## 5  0.4 0.9999978 2.058215e-06 1.175796e-07
+## 6  0.5 0.9999974 2.465242e-06 1.628050e-07</code></pre>
+<p>A continuación vamos a rearreglar los datos de los resultados (<strong>out</strong>), usando el paquete <strong>tidyverse</strong>. Esto facilita otros análisis y la gráficación de los resultados.</p>
+<pre class="r"><code>library(tidyverse)
+new.out &lt;- as.data.frame(out) %&gt;% gather(key, value, -time) 
+head(new.out)</code></pre>
+<pre><code>##   time key     value
+## 1  0.0   S 0.9999990
+## 2  0.1   S 0.9999988
+## 3  0.2   S 0.9999985
+## 4  0.3   S 0.9999982
+## 5  0.4   S 0.9999978
+## 6  0.5   S 0.9999974</code></pre>
+<p>En este nuevo objeto, <em>new.out</em>, la variable <em>key</em> contiene los grupos <span class="math inline">\(S\)</span>, <span class="math inline">\(I\)</span>, y <span class="math inline">\(R\)</span>, y <em>value</em> el respectivo valor del grupo en ese tiempo (<em>time</em>).</p>
+<p>Ahora construiremos una gráfica usando el paquete <strong>ggplot2</strong>:</p>
+<p><img src="ModelMecODE-SIR-I_files/figure-html/ggplot.sir-1.png" width="672" /></p>
+<p>Un dato importante es el valor máximo de infectados:</p>
+<pre class="r"><code># valor máximo de I y tiempo usando un pipe
+new.out %&gt;% 
+  filter(key==&quot;I&quot;) %&gt;% 
+  filter(value==max(value)) %&gt;% 
+  mutate(maxI = round(N * value, 2)) %&gt;%
+  select(time, maxI)</code></pre>
+<pre><code>##   time maxI
+## 1    9 0.67</code></pre>
+<pre class="r"><code># valor de S_umbral
+out$S[which.max(out$I)]</code></pre>
+<pre><code>## [1] 0.09936161</code></pre>
+</div>
+</div>
+</div>
+<div id="modelo-sir-para-sarampión-en-humacao" class="section level2">
+<h2>Modelo SIR para sarampión en Humacao</h2>
+<p><strong>El problema</strong>: si se declara una epidemia de sarampión en Humacao, es muy probable no contar con las camas suficientes para los enfermos. Hay que comprobarlo.</p>
+<p><em>Datos a buscar</em>:</p>
+<ul>
+<li>población de Humacao</li>
+<li>número de camas en hospitales</li>
+<li>parámetros del sarampión</li>
+</ul>
+<p><em>Usar el modelo SIR en R</em>.</p>
+<p><em>Proponer soluciones</em>.</p>
+<pre class="r"><code>library(deSolve)
+#tamaño poblacional
+N = 50000
+#estado inicial de los compartimentos
+init &lt;- c(S = 1-1/50000,
+          I = 1/50000,
+          R = 0)
+#parámetros del modelo (coeficientes de las variables)
+param &lt;- c(beta = 3.4,
+           gamma = 0.2)
+#crear la función con las ODE
+sir &lt;- function(times, init, param) {
+  with(as.list(c(init, param)), {
+#ecuaciones diferenciales   
+    dS &lt;- -beta * S * I
+    dI &lt;-  beta * S * I - gamma * I
+    dR &lt;-                 gamma * I
+#resultados de las tasas de cambio    
+    return(list(c(dS, dI, dR)))
+  })
+}
+#intervalo de tiempo y resolución
+times &lt;- seq(0, 20, by = .1)
+#resolver el sistema de ecuaciones con función &#39;ode&#39;
+out &lt;- ode(y = init, times = times, func = sir, parms = param)
+#cambiar out a un data.frame
+out &lt;- as.data.frame(out)
+head(out, 3)</code></pre>
+<pre><code>##   time         S            I            R
+## 1  0.0 0.9999800 2.000000e-05 0.000000e+00
+## 2  0.1 0.9999719 2.761384e-05 4.758773e-07
+## 3  0.2 0.9999608 3.811587e-05 1.132278e-06</code></pre>
+<pre class="r"><code>#rearreglo del output
+new.out &lt;- as.data.frame(out) %&gt;%
+  gather(key, value, -time) %&gt;%
+  mutate(value=value*N) #de proporción a individuos
+head(new.out, 3)</code></pre>
+<pre><code>##   time key    value
+## 1  0.0   S 49999.00
+## 2  0.1   S 49998.60
+## 3  0.2   S 49998.04</code></pre>
+<pre class="r"><code>#gráfica conjunta
+ggplot(data=new.out, 
+       aes(x = time,
+           y = value,
+           group = key,
+           col = key
+           )) + 
+      ylab(&quot;Individuos&quot;) + xlab(&quot;Tiempo (días)&quot;) +
+      geom_line(size = 1) + 
+      scale_colour_manual(values = c(&quot;red&quot;, &quot;green4&quot;, &quot;blue&quot;), name = &quot;Grupo&quot;) +
+      scale_y_continuous(labels = waiver(), limits = c(0, 60000))</code></pre>
+<p><img src="ModelMecODE-SIR-I_files/figure-html/sir.pueblo-1.png" width="672" /></p>
+<pre class="r"><code># nivel máximo de infección
+new.out %&gt;% 
+  filter(key==&quot;I&quot;) %&gt;% 
+  filter(value==max(value)) %&gt;% 
+  mutate(maxI = round(value, 0)) %&gt;%
+  select(time, maxI)</code></pre>
+<pre><code>##   time  maxI
+## 1  4.3 38726</code></pre>
+<div id="vacunación" class="section level3">
+<h3>Vacunación</h3>
+<pre class="r"><code>library(deSolve)
+#tamaño poblacional
+N = 50000
+pV = 0.6
+effV = 0.95
+#estado inicial de los compartimentos
+init &lt;- c(S = 1-1/50000-pV*effV,
+          I = 1/50000,
+          R = 0,
+          V = pV*effV)
+#parámetros del modelo (coeficientes de las variables)
+param &lt;- c(beta = 3,
+           gamma = 0.5)
+#crear la función con las ODE
+sirv &lt;- function(times, init, param) {
+  with(as.list(c(init, param)), {
+#ecuaciones diferenciales   
+    dS &lt;- -beta * S * I
+    dI &lt;-  beta * S * I - gamma * I
+    dR &lt;-                 gamma * I
+    dV &lt;- 0
+#resultados de las tasas de cambio    
+    return(list(c(dS, dI, dR, dV)))
+  })
+}
+#intervalo de tiempo y resolución
+times &lt;- seq(0, 90, by = .1)
+#resolver el sistema de ecuaciones con función &#39;ode&#39;
+out &lt;- ode(y = init, times = times, func = sirv, parms = param)
+#cambiar out a un data.frame
+out &lt;- as.data.frame(out)
+#eliminar la variable &#39;V&#39; en out
+out$V &lt;- NULL
+#mostrar 10 primeros datos
+head(out, 3)</code></pre>
+<pre><code>##   time         S            I            R
+## 1  0.0 0.4299800 2.000000e-05 0.000000e+00
+## 2  0.1 0.4299773 2.164483e-05 1.041118e-06
+## 3  0.2 0.4299744 2.342491e-05 2.167855e-06</code></pre>
+<pre class="r"><code>#rearreglo del output
+new.out &lt;- as.data.frame(out) %&gt;%
+  gather(key, value, -time) %&gt;%
+  mutate(value=value*N) #de proporción a individuos
+head(new.out, 3)</code></pre>
+<pre><code>##   time key    value
+## 1  0.0   S 21499.00
+## 2  0.1   S 21498.87
+## 3  0.2   S 21498.72</code></pre>
+<pre class="r"><code>#gráfica conjunta
+ggplot(data=new.out, 
+       aes(x = time,
+           y = value,
+           group = key,
+           col = key
+           )) + 
+      ylab(&quot;Individuos&quot;) + xlab(&quot;Tiempo (días)&quot;) +
+      geom_line(size = 1) + 
+      scale_colour_manual(values = c(&quot;red&quot;, &quot;green4&quot;, &quot;blue&quot;), name = &quot;Grupo&quot;) +
+      scale_y_continuous(labels = waiver(), limits = c(0, N-N*pV*effV))</code></pre>
+<p><img src="ModelMecODE-SIR-I_files/figure-html/unnamed-chunk-1-1.png" width="672" /></p>
+<pre class="r"><code># nivel máximo de infección
+new.out %&gt;% 
+  filter(key==&quot;I&quot;) %&gt;% 
+  filter(value==max(value)) %&gt;% 
+  mutate(maxI = round(value, 0)) %&gt;%
+  select(time, maxI)</code></pre>
+<pre><code>##   time maxI
+## 1 13.2 5268</code></pre>
+</div>
+<div id="modelo-sir-con-parámetro-demográfico-mu" class="section level3">
+<h3>Modelo SIR con parámetro demográfico <span class="math inline">\(\mu\)</span></h3>
+<pre class="r"><code>library(deSolve)
+library(tidyverse)
+#tamaño poblacional
+N = 1
+#estado inicial de los compartimentos
+init &lt;- c(S = 0.2,
+          I = 1e-6,
+          R = 0.8 - 1e-6)
+#parámetros del modelo (coeficientes de las variables)
+param &lt;- c(beta = 2.4,
+           gamma = 0.2,
+           mu = 2e-4)
+#crear la función con las ODE
+sir &lt;- function(times, init, param) {
+  with(as.list(c(init, param)), {
+#ecuaciones diferenciales   
+    dS &lt;- mu - beta * S * I - mu * S
+    dI &lt;-  beta * S * I - gamma * I - mu * I
+    dR &lt;-                 gamma * I - mu * R
+#resultados de las tasas de cambio    
+    return(list(c(dS, dI, dR)))
+  })
+}
+#intervalo de tiempo y resolución
+times &lt;- seq(0, 3650, by = 1)
+#resolver el sistema de ecuaciones con función &#39;ode&#39;
+out &lt;- ode(y = init, times = times, func = sir, parms = param)
+#cambiar out a un data.frame
+out &lt;- as.data.frame(out)
+#mostrar 3 primeros datos
+head(out, 3)</code></pre>
+<pre><code>##   time         S            I         R
+## 1    0 0.2000000 1.000000e-06 0.7999990
+## 2    1 0.2001594 1.325479e-06 0.7998392
+## 3    2 0.2003186 1.757321e-06 0.7996796</code></pre>
+<pre class="r"><code>#gráficas individuales
+#infectados
+ggplot(data=out, 
+       aes(x = time,
+           y = I)) +
+      ylab(&quot;Proporción&quot;) + xlab(&quot;Tiempo (días)&quot;) +
+  ggtitle(&quot;Infectados&quot;) +
+      geom_line(size = 0.5, col = &quot;red&quot;) + 
+      scale_y_continuous(labels = waiver())</code></pre>
+<p><img src="ModelMecODE-SIR-I_files/figure-html/mu.sir-1.png" width="672" /></p>
+<pre class="r"><code>#susceptibles
+ggplot(data=out, 
+       aes(x = time,
+           y = S)) +
+      ylab(&quot;Proporción&quot;) + xlab(&quot;Tiempo (días)&quot;) +
+  ggtitle(&quot;Susceptibles&quot;) +
+      geom_line(size = 0.5, col = &quot;blue&quot;) + 
+      scale_y_continuous(labels = waiver())</code></pre>
+<p><img src="ModelMecODE-SIR-I_files/figure-html/mu.sir-2.png" width="672" /></p>
+<pre class="r"><code>#recuperados
+ggplot(data=out, 
+       aes(x = time,
+           y = R)) +
+      ylab(&quot;Proporción&quot;) + xlab(&quot;Tiempo (días)&quot;) +
+  ggtitle(&quot;Recuperados&quot;) +
+      geom_line(size = 0.5, col = &quot;green&quot;) + 
+      scale_y_continuous(labels = waiver())</code></pre>
+<p><img src="ModelMecODE-SIR-I_files/figure-html/mu.sir-3.png" width="672" /></p>
+</div>
+<div id="modelo-sir-demográfico-y-aleatorio" class="section level3">
+<h3>Modelo SIR demográfico y aleatorio</h3>
+<pre class="r"><code>library(deSolve)
+#tamaño poblacional
+N = 1
+#estado inicial de los compartimentos
+init &lt;- c(S = 0.1,
+          I = 1e-6,
+          R = 0.9 - 1e-6)
+#parámetros del modelo (coeficientes de las variables)
+param &lt;- c(beta = 3.4,
+           gamma = 0.2,
+           mu = 2e-4)
+#crear la función con las ODE
+sir &lt;- function(times, init, param) {
+  with(as.list(c(init, param)), {
+#ecuaciones diferenciales   
+    dS &lt;- mu - beta * S * I * runif(1, 0.999, 1.001) - mu * S
+    dI &lt;-  beta * S * I - gamma * I - mu * I
+    dR &lt;-                 gamma * I - mu * R
+#resultados de las tasas de cambio    
+    return(list(c(dS, dI, dR)))
+  })
+}
+#intervalo de tiempo y resolución
+times &lt;- seq(0, 3650, by = 1)
+#resolver el sistema de ecuaciones con función &#39;ode&#39;
+out &lt;- ode(y = init, times = times, func = sir, parms = param)
+#cambiar out a un data.frame
+out &lt;- as.data.frame(out*N) #aqui puede multiplicar &#39;out&#39; por N
+#mostrar 6 primeros datos
+head(out)</code></pre>
+<pre><code>##   time         S            I         R
+## 1    0 0.1000000 1.000000e-06 0.8999990
+## 2    1 0.1001800 1.152998e-06 0.8998192
+## 3    2 0.1003597 1.332377e-06 0.8996396
+## 4    3 0.1005390 1.540992e-06 0.8994599
+## 5    4 0.1007184 1.785519e-06 0.8992804
+## 6    5 0.1008975 2.067525e-06 0.8991010</code></pre>
+<pre class="r"><code>#gráficas individuales
+#infectados
+ggplot(data=out, 
+       aes(x = time,
+           y = I)) +
+      ylab(&quot;Proporción&quot;) + xlab(&quot;Tiempo (días)&quot;) +
+  ggtitle(&quot;Infectados&quot;) +
+      geom_line(size = 0.5, col = &quot;red&quot;) + 
+      scale_y_continuous(labels = waiver())</code></pre>
+<p><img src="ModelMecODE-SIR-I_files/figure-html/unnamed-chunk-2-1.png" width="672" /></p>
+<pre class="r"><code>#susceptibles
+ggplot(data=out, 
+       aes(x = time,
+           y = S)) +
+      ylab(&quot;Proporción&quot;) + xlab(&quot;Tiempo (días)&quot;) +
+  ggtitle(&quot;Susceptibles&quot;) +
+      geom_line(size = 0.5, col = &quot;blue&quot;) + 
+      scale_y_continuous(labels = waiver())</code></pre>
+<p><img src="ModelMecODE-SIR-I_files/figure-html/unnamed-chunk-2-2.png" width="672" /></p>
+<pre class="r"><code>#recuperados
+ggplot(data=out, 
+       aes(x = time,
+           y = R)) +
+      ylab(&quot;Proporción&quot;) + xlab(&quot;Tiempo (días)&quot;) +
+  ggtitle(&quot;Recuperados&quot;) +
+      geom_line(size = 0.5, col = &quot;green&quot;) + 
+      scale_y_continuous(labels = waiver())</code></pre>
+<p><img src="ModelMecODE-SIR-I_files/figure-html/unnamed-chunk-2-3.png" width="672" /></p>
+</div>
+</div>
+</div>
+<div id="modelo-con-disminución-de-contactos-distanciamiento-físico" class="section level1">
+<h1>Modelo con disminución de contactos (distanciamiento físico)</h1>
+<pre class="r"><code>library(deSolve)
+#tamaño poblacional
+N = 50000
+#estado inicial de los compartimentos
+init &lt;- c(S = 1-1/50000,
+          I = 1/50000,
+          R = 0)
+#parámetros del modelo (coeficientes de las variables)
+param &lt;- c(beta = 3.4,
+           gamma = 0.2,
+           rho = 1)
+#crear la función con las ODE
+sir &lt;- function(times, init, param) {
+  with(as.list(c(init, param)), {
+#ecuaciones diferenciales   
+    dS &lt;- -rho * beta * S * I
+    dI &lt;-  rho * beta * S * I - gamma * I
+    dR &lt;-                 gamma * I
+#resultados de las tasas de cambio    
+    return(list(c(dS, dI, dR)))
+  })
+}
+#intervalo de tiempo y resolución
+times &lt;- seq(0, 20, by = .1)
+#resolver el sistema de ecuaciones con función &#39;ode&#39;
+out &lt;- ode(y = init, times = times, func = sir, parms = param)
+#cambiar out a un data.frame
+out &lt;- as.data.frame(out)
+head(out, 3)</code></pre>
+<pre><code>##   time         S            I            R
+## 1  0.0 0.9999800 2.000000e-05 0.000000e+00
+## 2  0.1 0.9999719 2.761384e-05 4.758773e-07
+## 3  0.2 0.9999608 3.811587e-05 1.132278e-06</code></pre>
+<pre class="r"><code>#rearreglo del output
+new.out &lt;- as.data.frame(out) %&gt;%
+  gather(key, value, -time) %&gt;%
+  mutate(value=value*N) #de proporción a individuos
+head(new.out, 3)</code></pre>
+<pre><code>##   time key    value
+## 1  0.0   S 49999.00
+## 2  0.1   S 49998.60
+## 3  0.2   S 49998.04</code></pre>
+<pre class="r"><code>#gráfica conjunta
+ggplot(data=new.out, 
+       aes(x = time,
+           y = value,
+           group = key,
+           col = key
+           )) + 
+      ylab(&quot;Individuos&quot;) + xlab(&quot;Tiempo (días)&quot;) +
+      geom_line(size = 1) + 
+      scale_colour_manual(values = c(&quot;red&quot;, &quot;green4&quot;, &quot;blue&quot;), name = &quot;Grupo&quot;) +
+      scale_y_continuous(labels = waiver(), limits = c(0, 60000))</code></pre>
+<p><img src="ModelMecODE-SIR-I_files/figure-html/sir.contact-1.png" width="672" /></p>
+<pre class="r"><code># nivel máximo de infección
+new.out %&gt;% 
+  filter(key==&quot;I&quot;) %&gt;% 
+  filter(value==max(value)) %&gt;% 
+  mutate(maxI = round(value, 0)) %&gt;%
+  select(time, maxI)</code></pre>
+<pre><code>##   time  maxI
+## 1  4.3 38726</code></pre>
+</div>
+
+
+
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.odd').parent('tbody').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open');
+  });
+});
+</script>
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
